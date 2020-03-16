@@ -10,7 +10,6 @@
 #Include <Class_IniSaved>    ;加载类(ini自动保存)
 #Include <Class_WowConfigWtf>    ;加载类(魔兽世界Config.wtf文件控制)
 #Include <Class_WowAddOnsToc>    ;加载类(魔兽世界插件.toc文件控制)
-#Include <Class_WowAddOnSaveLua>    ;加载类(魔兽世界插件Saved.Lua文件控制)
 ;=======================================================================================================================
 ;新增模块线程 |
 ;=============
@@ -33,19 +32,21 @@ AddMod_Setting:
 	global WOW_EDITION_VERSION    ;魔兽版本号
 	global WOW_ADDONS_PATH    ;插件目录路径
 	global WOW_WTF_PATH    ;WTF路径
+	;魔兽相关文件缓存类
+	global WOW_WTF_CONFIG    ;WTF/Config.wtf
 	
 	;插件相关
 	global NECESSARY_ADDONS := ["PlayerInfo"]    ;必要的自制插件
 	
-	;魔兽相关文件缓存类
-	global WOW_WTF_CONFIG    ;WTF/Config.wtf
+	;自定义存储相关
+	global REAL_PATH    ;真实存储路径
 	
 	;为主TAB增加记忆功能
 	INI.Init("MainGui", "MainTab", 1)    ;Tab所选标签(默认选Tab1)
 	
 	;在MainGui的TAB上:
 	Gui, MainGui:Font, bold     ;粗体
-	Gui, MainGui:Add, GroupBox, xm+10 ym+30 w270 h75, % "本程序的配置数据文件"
+	Gui, MainGui:Add, GroupBox, xm+10 ym+30 w270 h77, % "本程序的配置数据文件"
 	Gui, MainGui:Font, norm     ;恢复
 	Gui, MainGui:Add, Radio, xp+13 yp+22 h22 vini_AppGeneral_UserConfigIniPos ggSET_RDDatePos, 保存到程序所在目录
 	Gui, MainGui:Add, Radio, xp y+1 hp ggSET_RDDatePos Checked, 保存到AppData目录
@@ -53,21 +54,28 @@ AddMod_Setting:
 	Gui, MainGui:Add, Button, xp y+1 Center wp hp ggSET_BTopen2, 打开AppData目录
 	
 	Gui, MainGui:Font, bold     ;粗体
-	Gui, MainGui:Add, GroupBox, xm+10 y+13 w270 h120, % "WoW游戏路径/版本选择"
+	Gui, MainGui:Add, GroupBox, xm+10 y+13 w270 h113, % "WoW游戏路径/版本选择"
 	Gui, MainGui:Font, norm     ;恢复
-	Gui, MainGui:Add, Edit, xp+13 yp+25 w245 ReadOnly Section vini_Setting_WoWPath,
-	Gui, MainGui:Add, Button, xp y+5 w120 h26 ggSET_autoGetWoWFolder, 自动识别
+	Gui, MainGui:Add, Edit, xp+13 yp+25 w245 h22 ReadOnly Section vini_Setting_WoWPath,
+	Gui, MainGui:Add, Button, xp y+5 w120 hp ggSET_autoGetWoWFolder, 自动识别
 	Gui, MainGui:Add, Button, x+5 yp wp hp ggSET_selectWoWFolder, 手动选择
 	Gui, MainGui:Add, Text, xs y+7 w55, 版本选择:
 	Gui, MainGui:Add, Text, x+5 yp w94 vvSET_TXEditionInfo,
 	Gui, MainGui:Add, DDL, x+0 yp-2 w90 vini_Setting_WoWEdition ggSET_DDLWoWEdition, % INI.Init("Setting", "WoWEdition")
-	
 	
 	Gui, MainGui:Font, bold     ;粗体
 	Gui, MainGui:Add, GroupBox, xm+10 y+15 w270 h55, % "WoW相关插件"
 	Gui, MainGui:Font, norm     ;恢复
 	Gui, MainGui:Add, Text, xp+13 yp+25 w175 h22 Section, % "PlayerInfo(离线获取角色信息)"
 	Gui, MainGui:Add, Button, x+0 yp-2 w70 hp vvSET_BTInstallAddon1 ggSET_BTInstallAddon, 安装
+	
+	Gui, MainGui:Font, bold     ;粗体
+	Gui, MainGui:Add, GroupBox, xm+10 y+13 w270 h85, % "真实存档路径"
+	Gui, MainGui:Font, norm     ;恢复
+	Gui, MainGui:Add, Edit, xp+13 yp+25 w245 h22 ReadOnly Section vini_Setting_RealPath,
+	Gui, MainGui:Add, Button, xp y+5 wp hp ggSET_selectrealFolder, 选择路径
+
+	
 	
 	;~ Gui, MainGui:Add, 
 return
@@ -86,13 +94,24 @@ GuiInit_Setting:
 	if FileExist(ini_Setting_WoWPath "\" ini_Setting_WoWEdition "\WTF")    ;初始化时验证到魔兽地址正确
 	{
 		GuiControl,, ini_Setting_WoWPath, % WOW_PATH := ini_Setting_WoWPath    ;游戏路径
-		GuiControl,, ini_Setting_WoWEdition, % GetSubFolderIfHasFile(WOW_PATH, "WTF")    ;魔兽版本列表
+		GuiControl,, ini_Setting_WoWEdition, % folderList := GetSubFolderIfHasFile(WOW_PATH, "WTF")    ;魔兽版本列表
 		GuiControl, ChooseString, ini_Setting_WoWEdition, % WOW_EDITION := ini_Setting_WoWEdition    ;魔兽版本选择上次
 		gosub, DoAfterEditionChange
 	}
 	else    ;验证失败
 	{
 		gosub, gSET_autoGetWoWFolder
+	}
+	;GroupBox<自定义存储路径>:
+	INI.Init("Setting", "RealPath", "")    ;真实存储位置
+	if FileExist(ini_Setting_RealPath)    ;初始化时验证到真实存储位置地址正确
+	{
+		REAL_PATH := ini_Setting_RealPath    ;游戏路径
+		gosub, DoAfterEditionChange
+	}
+	else    ;验证失败
+	{
+		REAL_PATH := ""
 	}
 return
 
@@ -176,7 +195,6 @@ return
 
 ;成功找到wow路径后
 DoAfterFindWoWPath:
-	SB_SetText("游戏目录变更:" WOW_PATH)
 	GuiControl,, ini_Setting_WoWPath, % WOW_PATH    ;地址栏变更
 	if (folderList := GetSubFolderIfHasFile(WOW_PATH, "WTF"))    ;含版本的路径
 	{
@@ -184,7 +202,6 @@ DoAfterFindWoWPath:
 		gosub, DoAfterEditionChange
 		GuiControl,, ini_Setting_WoWEdition, % folderList    ;魔兽版本列表变更
 		GuiControl, ChooseString, ini_Setting_WoWEdition, % WOW_EDITION
-		SB_SetText("游戏目录变更:" WOW_PATH)
 	}
 	else    ;未找到版本
 	{
@@ -200,7 +217,7 @@ gSET_DDLWoWEdition:
 	gosub, DoAfterEditionChange
 return
 
-;获取了足够信息后的初始化
+;魔兽版本改变后的动作
 DoAfterEditionChange:
 	if !FileExist(WOW_PATH "\" WOW_EDITION)
 		return
@@ -212,10 +229,37 @@ DoAfterEditionChange:
 	WOW_WTF_CONFIG := new WowConfigWtf(WOW_WTF_PATH "\Config.wtf")
 	WOW_EDITION_VERSION := WOW_WTF_CONFIG.Get("lastAddonVersion")    ;获取当前版本号
 	GuiControl,, vSET_TXEditionInfo, % WOW_EDITION_CN[WOW_EDITION] "(" WOW_EDITION_VERSION ")"
+	
+	;自定义存储路径生成对应子文件夹
+	gosub, DoAfterFindRealPath
+	
 	;是否安装了相关插件检测及版本更新
 	gosub, AddonsCheckAndUpdata
 return
 
+;=======================================================================================================================
+;GroupBox<自定义存储路径> |
+;========================
+;是否安装了相关插件检测及插件版本更新
+gSET_selectRealFolder:
+	Gui MainGui:+OwnDialogs    ;对话框出现时禁止操作主GUI
+	FileSelectFolder, newRealFolder,,, 请选择自定义存储目录路径
+	if newRealFolder	;有效值
+	{
+		REAL_PATH := newRealFolder
+		gosub, DoAfterFindRealPath
+	}
+return
+
+;成功选择了自定义存储路径后
+DoAfterFindRealPath:
+	GuiControl,, ini_Setting_RealPath, % REAL_PATH    ;地址栏变更
+	;创建当前版本的子文件夹
+	if FileExist(REAL_PATH) and WOW_EDITION
+	{
+		FileCreateDir, % REAL_PATH "\" WOW_EDITION "\WTF\Account"    ;配置存储路径
+	}
+return
 
 ;=======================================================================================================================
 ;GroupBox<WoW相关插件> |
@@ -256,6 +300,10 @@ gSET_BTInstallAddon:
 			   , % WOW_ADDONS_PATH "\PlayerInfo\PlayerInfo.lua"
 	gosub, AddonsCheckAndUpdata
 return
+
+
+
+
 
 
 ;=======================================================================================================================

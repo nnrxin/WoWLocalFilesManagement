@@ -30,7 +30,7 @@ FileCreateDir, % APP_DATA_PATH                    ;路径不存在时需要新�
 
 
 ;创建主GUI
-Gui, MainGui:New, +Resize +MinSize243x450 +HwndhMainGui
+Gui, MainGui:New, +Resize +MinSize763x450 +HwndhMainGui
 Gui, MainGui:Font,, 微软雅黑
 
 Gui, MainGui:Font, bold     ;粗体

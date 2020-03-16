@@ -1,34 +1,36 @@
 ﻿;需要函数 
-;文件重写函数 FileRewrite(FliePath,Content,Encoding:="")
-;生成key-value函数 ObjSetKeys(ByRef Obj,k,v)
-;~ ???????正则匹配全部：RegExMatchGlobal()?????
-class WowAddOnSaveLua
+;ObjGetKeys(ByRef Obj,k,v)
+;ObjSetKeys(ByRef Obj,k,v)
+;ObjDelKeys(ByRef Obj,k,v)
+class WowAddOnSavedLua
 {
 	static FILE_ENCODING := "UTF-8"    ;文件所用编码
 	
-	__New(FilePath,mod:="Obj")   ;默认快速模式,不存储位置信息
+	__New(filePath, mod := "Fast")   ;默认快速模式,不存储位置信息   默认Fast  开启强读取模式用Obj
 	{
-		OldBatchLines:=A_BatchLines   ;保存当前运行速度设置
+		if !FileExist(filePath)
+			return
+		OldBatchLines := A_BatchLines   ;保存当前运行速度设置
 		SetBatchLines -1   ;全速运行
-		OldFileEncoding:=A_FileEncoding     ;保存当前编码
+		OldFileEncoding := A_FileEncoding     ;保存当前编码
 		FileEncoding % this.FILE_ENCODING    ;设置编码
-		this.mod:=mod   ;模式信息
+		this.mod := mod   ;模式信息
 		;保存整体内容到变量
-		FileRead, OutputVar, % this.FilePath:=FilePath
-		this.file:=OutputVar, OutputVar:=""
+		FileRead, OutputVar, % this.filePath := filePath
+		this.file := OutputVar, OutputVar := ""
 		;读取每行内容到数组
-		this.line:={}   ;行信息
-		,this.Obj:={}   ;整体数组
-		,this.Range:={}   ;位置信息
-		,keyList:={}  
-		,tabbefore:=0
-		,ArrayIndex:=[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]
-		Loop, Read, %FilePath%
+		this.line := {}   ;行信息
+		,this.Obj := {}   ;整体数组
+		,this.Range := {}   ;位置信息
+		,keyList := {}  
+		,tabbefore := 0
+		,ArrayIndex := [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]
+		Loop, Read, %filePath%
 		{
-			tabnumber:=instr(A_LoopReadLine,A_Tab,,0)
-			,lineflag:=SubStr(A_LoopReadLine,tabnumber+1,1)
-			,endflag:=instr(A_LoopReadLine,",")
-			,key:=Trim((lineflag="[")?SubStr(A_LoopReadLine,tabnumber+2,InStr(A_LoopReadLine,"] = ")-tabnumber-2):"","""")
+			tabnumber := Instr(A_LoopReadLine,A_Tab,,0)
+			,lineflag := SubStr(A_LoopReadLine,tabnumber+1,1)
+			,endflag := Instr(A_LoopReadLine,",")
+			,key := Trim((lineflag="[")?SubStr(A_LoopReadLine,tabnumber+2,Instr(A_LoopReadLine,"] = ")-tabnumber-2):"","""")
 			,value := (key!="" and endflag)
 						?RegExReplace(A_LoopReadLine,"S)(.*\] = ""?)|(""?,.*)","")  
 					:(lineflag!="}" and endflag)
@@ -42,12 +44,12 @@ class WowAddOnSaveLua
 									,lineflag:lineflag
 									,key     :key
 									,value   :value}
-			if (Mod!="Obj" or tabnumber=0)   ;非Obj模式或首位行时跳过
+			if (Mod <> "Obj" or tabnumber == 0)   ;非Obj模式或首位行时跳过
 				continue
 			;由增减改变keylist
-			if (tabnumber>tabbefore)   ;增
+			if (tabnumber > tabbefore)   ;增
 			{
-				if (key!="")   ;含键
+				if (key <> "")   ;含键
 					keyList.push(key)
 				else           ;无键
 				{
@@ -72,19 +74,19 @@ class WowAddOnSaveLua
 					this.Range[Array2Str(keyList)]:={Start:A_index}   ;写入key起始行位置
 				}
 				else ;if (lineflag="}")   ;右括号
-					this.Range[Array2Str(keyList)].End:=A_index   ;写入key结束行位置
+					this.Range[Array2Str(keyList)].End := A_index   ;写入key结束行位置
 			}
 			else ;if (tabnumber<tabbefore)   ;减
 			{
 				ArrayIndex[tabbefore]:=0
 				keyList.pop()
-				this.Range[Array2Str(keyList)].End:=A_index   ;写入key结束行位置
+				this.Range[Array2Str(keyList)].End := A_index   ;写入key结束行位置
 			}
 			;写入信息
 			if (value!="")
 				ObjSetKeys(this.Obj,keyList,value)   ;写入整体数组
 			;下一循环前
-			tabbefore:=tabnumber
+			tabbefore := tabnumber
 		}
 		FileEncoding %OldFileEncoding%     ;恢复之前的编码
 		SetBatchLines %OldBatchLines%   ;全速运行
@@ -92,23 +94,24 @@ class WowAddOnSaveLua
 	
     __Delete()
 	{
-		this.line:=this.FilePath:=this.file:=this.Obj:=""
+		this.line := this.filePath := this.file:=this.Obj:=""
 	}
 
 	;逐行合并this.line, 重写文件
 	FileRewriteByLine()
 	{
+		newContent := ""
 		loop % this.line.MaxIndex()
-			NewContent.=this.line[A_index].txt "`r`n"
-		FileRewrite(this.FilePath,NewContent,this.FILE_ENCODING)    ;文件重写
+			newContent .= this.line[A_index].txt "`r`n"
+		this.FileRewrite(newContent)    ;文件重写
 	}
 
 	;文件用NewContent的内容覆盖
-	FileRewriteByValue(NewContent)
+	FileRewriteByValue(newContent)
 	{
-		if not NewContent
+		if not newContent
 			return
-		FileRewrite(this.FilePath,NewContent,this.FILE_ENCODING)    ;文件重写
+		this.FileRewrite(newContent)    ;文件重写
 	}
 
 	;如果发现存在str，发现返回真,否则假  ；简单强大！
@@ -118,12 +121,14 @@ class WowAddOnSaveLua
 		return (OutputVar=-1)?false:true
 	}
 
-	;(优先)Obj对象模式获取key的值,key为精准数组,结果为多信息数组
-	;普通模式获取key的值,key为模糊数组,结果为数组
-	Get(key,OnlyFirst:=true)
+	;结果返回数组
+	;Obj模式返回 Result := {Range:{start:1,end:10},txt:"XXXX",Obj:Obj,Value:"XXX",SubKeys:SubKeys}
+	;Fast模式开启onlyFirst返回   Result := {Range:{start:1,end:10},txt:"XXXX"}
+	;Fast模式不开启onlyFirst返回  Result[1]:={Range:{start:1,end:10},txt:"XXXX"}
+	Get(key, onlyFirst := true)
 	{
 		;Obj对象模式(速度更快):
-		if (this.mod="Obj")
+		if (this.mod == "Obj")
 		{
 			Range:=this.Range[Array2Str(key)]   ;位置信息
 			,txt:=this.GetLinesTxtByRange(Range)   ;文本信息
@@ -132,13 +137,13 @@ class WowAddOnSaveLua
 			,SubKeys:={}   ;子键列表
 			for k in ObjGetKeys(this.Obj,key)
 				SubKeys.push(k)
-			return {Range:Range,txt:txt,Obj:Obj,Value:Value,SubKeys:SubKeys}
+			return {Range:Range,txt:txt,Obj:Obj,Value:Value,SubKeys:SubKeys}    ;Result := {Range:{start:1,end:10},txt:"XXXX"}
 		}
 		;普通模式:
-		KeyIndex:=1
-		,KeyMaxIndex:=key.Length()
-		,ResultIndex:=1
-		,Result:={}
+		KeyIndex := 1
+		,KeyMaxIndex := key.Length()
+		,ResultIndex := 1
+		,Result := {}
 		for k, v in this.line
 		{
 			if (v.key=key[KeyIndex])   ;发现符合
@@ -158,11 +163,11 @@ class WowAddOnSaveLua
 			{
 				Result[ResultIndex].Range.end:=A_index
 				Result[ResultIndex].txt:=this.GetLinesTxtByRange(Result[ResultIndex].Range)   ;文本信息
-				if (ResultIndex=1 and OnlyFirst=true)   ;快速模式只输出第一个找到的
-					break
+				if (ResultIndex == 1 and onlyFirst == true)   ;快速模式只输出第一个找到的
+					return Result[1]    ;Result:={Range:{start:1,end:10},txt:"XXXX"}
 				ResultIndex++   ;结果序号+1
-				KeyIndex:=1   ;重新搜索
-				,Startlevel:=-1   ;起始行置-1
+				KeyIndex := 1   ;重新搜索
+				,Startlevel := -1   ;起始行置-1
 			}
 		}
 		return Result   ;Result[1]:={Range:{start:1,end:10},txt:"XXXX"}
@@ -292,12 +297,12 @@ class WowAddOnSaveLua
 			Newline:={}
 			Loop, Parse, % StrReplace(RTrim(Contents,"`r`n"),"`r`n","￠"), ￠   ; 使用￠替换`r`n后使用￠解析字符串.
 			{
-				tabnumber:=instr(A_LoopField,A_Tab,,0)
+				tabnumber:=Instr(A_LoopField,A_Tab,,0)
 				lineflag:=SubStr(A_LoopField,tabnumber+1,1)
-				key:=(lineflag="[")?SubStr(A_LoopField,tabnumber+2,InStr(A_LoopField,"] = ")-tabnumber-2):""   
+				key:=(lineflag="[")?SubStr(A_LoopField,tabnumber+2,Instr(A_LoopField,"] = ")-tabnumber-2):""   
 				Newline[A_index]:={txt:A_LoopField
 					,level:tabnumber
-					,endflag:instr(A_LoopField,",")
+					,endflag:Instr(A_LoopField,",")
 					,lineflag:lineflag
 					,key:Trim(key,"""")}
 			}
@@ -320,5 +325,14 @@ class WowAddOnSaveLua
 		loop % Range.end-Range.start
 			Result.="`r`n" this.line[LineIndex++].txt 
 		return Result
+	}
+	
+	;不删除原文件的情况下重写文件
+	FileRewrite(Content)
+	{
+		File := FileOpen(this.filePath, "rw", this.FILE_ENCODING)
+		File.Length := 0
+		File.Write(Content)
+		File.Close()
 	}
 }
