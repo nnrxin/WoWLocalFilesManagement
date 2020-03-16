@@ -21,7 +21,6 @@ SetDefaultMouseSpeed, 0
 SetWinDelay, -1  
 SetControlDelay, -1
 SendMode Input
-SetWorkingDir, % A_ScriptDir
 
 ;APP基本信息
 global APP_NAME      := "WoWLocalFilesManagement" ;APP名称
@@ -29,8 +28,6 @@ global APP_VERSION   := 0.2                       ;当前版本
 global APP_DATA_PATH := A_AppData "\" APP_NAME    ;在系统AppData的保存位置
 FileCreateDir, % APP_DATA_PATH                    ;路径不存在时需要新建
 
-;安装必要的组件
-FileInstallTo(APP_DATA_PATH)
 
 ;创建主GUI
 Gui, MainGui:New, +Resize +MinSize763x450 +HwndhMainGui
@@ -59,9 +56,7 @@ OnExit, DoBeforeExitApp
 ;=========================
 return    ;自动运行段结束 |
 ;=======================================================================================================================
-;=======================================================================================================================
-#Include WoWLocalFilesManagement_InstallFile.ahk    ;加载类(ini自动保存)
-;=======================================================================================================================
+
 ;=======================================================================================================================
 ;退出前自动运行段 |
 ;================
