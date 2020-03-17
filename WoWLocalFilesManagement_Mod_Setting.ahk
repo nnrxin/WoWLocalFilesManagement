@@ -45,17 +45,17 @@ AddMod_Setting:
 	INI.Init("MainGui", "MainTab", 1)    ;Tab所选标签(默认选Tab1)
 	
 	;在MainGui的TAB上:
-	Gui, MainGui:Font, bold     ;粗体
+	Gui, MainGui:Font,, 微软雅黑
 	Gui, MainGui:Add, GroupBox, xm+10 ym+30 w270 h77, % "本程序的配置数据文件"
-	Gui, MainGui:Font, norm     ;恢复
+	Gui, MainGui:Font,, 微软雅黑 Light
 	Gui, MainGui:Add, Radio, xp+13 yp+22 h22 vini_AppGeneral_UserConfigIniPos ggSET_RDDatePos, 保存到程序所在目录
 	Gui, MainGui:Add, Radio, xp y+1 hp ggSET_RDDatePos Checked, 保存到AppData目录
 	Gui, MainGui:Add, Button, x+2 yp-23 Center w110 h22 ggSET_BTopen1, 打开程序所在目录
 	Gui, MainGui:Add, Button, xp y+1 Center wp hp ggSET_BTopen2, 打开AppData目录
 	
-	Gui, MainGui:Font, bold     ;粗体
-	Gui, MainGui:Add, GroupBox, xm+10 y+13 w270 h113, % "WoW游戏路径/版本选择"
-	Gui, MainGui:Font, norm     ;恢复
+	Gui, MainGui:Font,, 微软雅黑
+	Gui, MainGui:Add, GroupBox, xm+10 y+13 w270 h113, % "WoW游戏路径/版本选择(可拖拽)"
+	Gui, MainGui:Font,, 微软雅黑 Light
 	Gui, MainGui:Add, Edit, xp+13 yp+25 w245 h22 ReadOnly Section vini_Setting_WoWPath,
 	Gui, MainGui:Add, Button, xp y+5 w120 hp ggSET_autoGetWoWFolder, 自动识别
 	Gui, MainGui:Add, Button, x+5 yp wp hp ggSET_selectWoWFolder, 手动选择
@@ -63,15 +63,15 @@ AddMod_Setting:
 	Gui, MainGui:Add, Text, x+5 yp w94 vvSET_TXEditionInfo,
 	Gui, MainGui:Add, DDL, x+0 yp-2 w90 vini_Setting_WoWEdition ggSET_DDLWoWEdition, % INI.Init("Setting", "WoWEdition")
 	
-	Gui, MainGui:Font, bold     ;粗体
+	Gui, MainGui:Font,, 微软雅黑
 	Gui, MainGui:Add, GroupBox, xm+10 y+15 w270 h55, % "WoW相关插件"
-	Gui, MainGui:Font, norm     ;恢复
+	Gui, MainGui:Font,, 微软雅黑 Light
 	Gui, MainGui:Add, Text, xp+13 yp+25 w175 h22 Section, % "PlayerInfo(离线获取角色信息)"
 	Gui, MainGui:Add, Button, x+0 yp-2 w70 hp vvSET_BTInstallAddon1 ggSET_BTInstallAddon, 安装
 	
-	Gui, MainGui:Font, bold     ;粗体
-	Gui, MainGui:Add, GroupBox, xm+10 y+13 w270 h85, % "真实存档路径"
-	Gui, MainGui:Font, norm     ;恢复
+	Gui, MainGui:Font,, 微软雅黑
+	Gui, MainGui:Add, GroupBox, xm+10 y+13 w270 h85, % "真实存档路径选择(可拖拽)"
+	Gui, MainGui:Font,, 微软雅黑 Light
 	Gui, MainGui:Add, Edit, xp+13 yp+25 w245 h22 ReadOnly Section vini_Setting_RealPath,
 	Gui, MainGui:Add, Button, xp y+5 wp hp ggSET_selectrealFolder, 选择路径
 
@@ -148,7 +148,7 @@ gSET_selectWoWFolder:
 	if newWoWFolder	;有效值
 	{
 		WOW_PATH := newWoWFolder
-		gosub, DoAfterFindWoWPath
+		gosub, DoAfterResetWoWPath
 	}
 return
 
@@ -157,7 +157,7 @@ gSET_autoGetWoWFolder:
 	;先查询注册表
 	if (WOW_PATH := GetWoWPathByReg())
 	{
-		gosub, DoAfterFindWoWPath
+		gosub, DoAfterResetWoWPath
 		return
 	}
 	;全盘扫描前询问(有些老电脑全盘扫描会卡住)
@@ -183,7 +183,7 @@ gSET_autoGetWoWFolder:
 	{
 		WOW_PATH := WoWFolder_AutoGet[1]    ;直接设定为目录
 		WOW_PATH := SubStr(WOW_PATH,1,instr(WOW_PATH,"\",,-1)-1)    ;去除\retail 文件夹
-		gosub, DoAfterFindWoWPath
+		gosub, DoAfterResetWoWPath
 	}
 	Gui MainGui:-Disabled    ;主窗口启用
 	WinActivate, ahk_id %hMainGui%    ;激活主窗口
@@ -194,7 +194,7 @@ RenewProgress:
 return
 
 ;成功找到wow路径后
-DoAfterFindWoWPath:
+DoAfterResetWoWPath:
 	GuiControl,, ini_Setting_WoWPath, % WOW_PATH    ;地址栏变更
 	if (folderList := GetSubFolderIfHasFile(WOW_PATH, "WTF"))    ;含版本的路径
 	{
@@ -212,9 +212,11 @@ return
 
 ;DDL选择版本(确定版本信息等于开始初始化了)
 gSET_DDLWoWEdition:
+	Gui MainGui:+Disabled	;主窗口禁用
 	Gui, Submit, NoHide
 	WOW_EDITION := ini_Setting_WoWEdition
 	gosub, DoAfterEditionChange
+	Gui MainGui:-Disabled	;主窗口启用
 return
 
 ;魔兽版本改变后的动作
@@ -231,7 +233,7 @@ DoAfterEditionChange:
 	GuiControl,, vSET_TXEditionInfo, % WOW_EDITION_CN[WOW_EDITION] "(" WOW_EDITION_VERSION ")"
 	
 	;自定义存储路径生成对应子文件夹
-	gosub, DoAfterFindRealPath
+	gosub, DoAfterResetRealPath
 	
 	;是否安装了相关插件检测及版本更新
 	gosub, AddonsCheckAndUpdata
@@ -240,19 +242,19 @@ return
 ;=======================================================================================================================
 ;GroupBox<自定义存储路径> |
 ;========================
-;是否安装了相关插件检测及插件版本更新
+;自定义安装路径选取
 gSET_selectRealFolder:
 	Gui MainGui:+OwnDialogs    ;对话框出现时禁止操作主GUI
 	FileSelectFolder, newRealFolder,,, 请选择自定义存储目录路径
 	if newRealFolder	;有效值
 	{
 		REAL_PATH := newRealFolder
-		gosub, DoAfterFindRealPath
+		gosub, DoAfterResetRealPath
 	}
 return
 
 ;成功选择了自定义存储路径后
-DoAfterFindRealPath:
+DoAfterResetRealPath:
 	GuiControl,, ini_Setting_RealPath, % REAL_PATH    ;地址栏变更
 	;创建当前版本的子文件夹
 	if FileExist(REAL_PATH) and WOW_EDITION
@@ -293,12 +295,10 @@ gSET_BTInstallAddon:
 		SB_SetText("未发现插件目录,插件安装失败")
 		return
 	}
-	FileCreateDir, % WOW_ADDONS_PATH "\PlayerInfo"
-	FileInstall, E:\HUI\OneDrive\autohotkey\AHK_9_自编程序\2.WoWLocalFilesManagement(WOW本地文件管理)\WoWLocalFilesManagement\wow\PlayerInfo\PlayerInfo.toc
-			   , % WOW_ADDONS_PATH "\PlayerInfo\PlayerInfo.toc"
-	FileInstall, E:\HUI\OneDrive\autohotkey\AHK_9_自编程序\2.WoWLocalFilesManagement(WOW本地文件管理)\WoWLocalFilesManagement\wow\PlayerInfo\PlayerInfo.lua
-			   , % WOW_ADDONS_PATH "\PlayerInfo\PlayerInfo.lua"
+	Gui MainGui:+Disabled	;主窗口禁用
+	FolderCopyEx(APP_DATA_PATH "\AddOns\PlayerInfo", WOW_ADDONS_PATH "\PlayerInfo")
 	gosub, AddonsCheckAndUpdata
+	Gui MainGui:-Disabled	;主窗口启用
 return
 
 
@@ -309,12 +309,28 @@ return
 ;=======================================================================================================================
 ;模块GUI附属 |
 ;============
+;Gui拖拽进来文件
+GuiDropFiles_Setting:
+	if not InStr(FileExist(A_GuiEvent),"D")
+		return
+	Switch A_GuiControl
+	{
+	;魔兽目录
+	Case "ini_Setting_WoWPath":
+		WOW_PATH := A_GuiEvent
+		gosub, DoAfterResetWoWPath
+	;自定义目录
+	Case "ini_Setting_RealPath":
+		REAL_PATH := A_GuiEvent
+		gosub, DoAfterResetRealPath
+	Default:
+	}
+return
 
 ;GUI尺寸控制:
 GuiSize_Setting:
 	;~ AutoXYWH("w h", "vHK_LVmain")
 return
-
 
 ;=======================================================================================================================
 ;模块GUI附属动作$函数 |

@@ -14,7 +14,7 @@
 #KeyHistory 0
 ListLines Off
 Process, Priority, , A
-SetBatchLines, -1
+;~ SetBatchLines, -1
 SetKeyDelay, -1, -1
 SetMouseDelay, -1
 SetDefaultMouseSpeed, 0
@@ -35,10 +35,12 @@ FileInstallTo(APP_DATA_PATH)
 ;创建主GUI
 Gui, MainGui:New, +Resize +MinSize763x450 +HwndhMainGui
 Gui, MainGui:Font,, 微软雅黑
+Gui, MainGui:Font,, 微软雅黑 Light
 
-Gui, MainGui:Font, bold     ;粗体
+
+Gui, MainGui:Font,, 微软雅黑
 Gui, MainGui:Add, Tab3, xm ym w740 h500 c0072E3 AltSubmit vini_MainGui_MainTab HwndhMainTab ggMainTab,   ;主标签
-Gui, MainGui:Font, norm     ;恢复
+Gui, MainGui:Font,, 微软雅黑 Light
 
 ;加载各模块及其Tab
 global MODS := []
@@ -76,21 +78,38 @@ ExitApp
 ;============
 ;主标签切换时
 gMainTab:
+	Gui MainGui:+Disabled
 	Gui, MainGui:Submit, NoHide
 	subName := "GuiTabIn_" MODS[ini_MainGui_MainTab].modName
 	if IsLabel(subName)
 		gosub, %subName%
+	Gui MainGui:-Disabled
 return
 
 ;Gui初始化
 GuiInit:
+	Gui MainGui:+Disabled
 	for i, mod in MODS
 	{
 		subName := "GuiInit_" mod.modName
 		if IsLabel(subName)
 			gosub, %subName%
 	}
+	Gui MainGui:-Disabled
 return
+
+;Gui拖拽进来文件
+MainGuiGuiDropFiles:
+	Gui MainGui:+Disabled
+	for i, mod in MODS
+	{
+		subName := "GuiDropFiles_" mod.modName
+		if IsLabel(subName)
+			gosub, %subName%
+	}
+	Gui MainGui:-Disabled
+return
+
 
 ;Gui重设尺寸
 MainGuiGuiSize:

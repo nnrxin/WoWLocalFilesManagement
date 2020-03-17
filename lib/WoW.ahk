@@ -7,19 +7,19 @@ WoW_GetClassInfo(str)
 	if base[str]
 		return base[str]
 	;存储信息里没有的
-	static info := {0:{index:0, color:0xE0E0E0}   ;默认返回
-		,1: {index:1,  name:"Warrior",     nameCN:"战士",     nameCNShort:"ZS", color:0xC79C6E}   ;ZS
-		,2: {index:2,  name:"Mage",        nameCN:"法师",     nameCNShort:"FS", color:0x69CCF0}   ;FS
-		,3: {index:3,  name:"Rogue",       nameCN:"潜行者",   nameCNShort:"DZ", color:0xFFF569}    ;DZ
-		,4: {index:4,  name:"Priest",      nameCN:"牧师",     nameCNShort:"MS", color:0xFFFFFF}    ;MS
-		,5: {index:5,  name:"Paladin",     nameCN:"圣骑士",   nameCNShort:"QS", color:0xF58CBA}     ;QS
-		,6: {index:6,  name:"Shaman",      nameCN:"萨满祭司", nameCNShort:"SM", color:0x0070DE}     ;SM
-		,7: {index:7,  name:"Druid",       nameCN:"德鲁伊",   nameCNShort:"XD", color:0xFF7D0A}     ;XD
-		,8: {index:8,  name:"Hunter",      nameCN:"猎人",     nameCNShort:"LR", color:0xABD473}     ;LR
-		,9: {index:9,  name:"Warlock",     nameCN:"术士",     nameCNShort:"SS", color:0x9482C9}     ;SS
-		,10:{index:10, name:"DeathKnight", nameCN:"死亡骑士", nameCNShort:"DK", color:0xC41F3B}     ;DK
-		,11:{index:11, name:"Monk",        nameCN:"武僧",     nameCNShort:"WS", color:0x00FF96}     ;WS
-		,12:{index:12, name:"DemonHunter", nameCN:"恶魔猎手", nameCNShort:"DH", color:0xA330C9}}    ;DH
+	static info := {0:{index:0, color:0xE8E8E8, colorBG:0x000000}   ;默认返回
+		,1: {index:1,  name:"Warrior",     nameCN:"战士",     nameCNShort:"ZS", color:0xC79C6E, colorBG:0x000000}     ;ZS
+		,2: {index:2,  name:"Mage",        nameCN:"法师",     nameCNShort:"FS", color:0x69CCF0, colorBG:0x000000}     ;FS
+		,3: {index:3,  name:"Rogue",       nameCN:"潜行者",   nameCNShort:"DZ", color:0xFFF569, colorBG:0x000000}     ;DZ
+		,4: {index:4,  name:"Priest",      nameCN:"牧师",     nameCNShort:"MS", color:0xFFFFFF, colorBG:0x000000}     ;MS
+		,5: {index:5,  name:"Paladin",     nameCN:"圣骑士",   nameCNShort:"QS", color:0xF58CBA, colorBG:0x000000}     ;QS
+		,6: {index:6,  name:"Shaman",      nameCN:"萨满祭司", nameCNShort:"SM", color:0x0070DE, colorBG:0xFFFFFF}     ;SM
+		,7: {index:7,  name:"Druid",       nameCN:"德鲁伊",   nameCNShort:"XD", color:0xFF7D0A, colorBG:0x000000}     ;XD
+		,8: {index:8,  name:"Hunter",      nameCN:"猎人",     nameCNShort:"LR", color:0xABD473, colorBG:0x000000}     ;LR
+		,9: {index:9,  name:"Warlock",     nameCN:"术士",     nameCNShort:"SS", color:0x9482C9, colorBG:0xFFFFFF}     ;SS
+		,10:{index:10, name:"DeathKnight", nameCN:"死亡骑士", nameCNShort:"DK", color:0xC41F3B, colorBG:0xFFFFFF}     ;DK
+		,11:{index:11, name:"Monk",        nameCN:"武僧",     nameCNShort:"WS", color:0x00FF96, colorBG:0x000000}     ;WS
+		,12:{index:12, name:"DemonHunter", nameCN:"恶魔猎手", nameCNShort:"DH", color:0xA330C9, colorBG:0xFFFFFF}}    ;DH
 	;null时返回默认值
 	if (str = "null")
 		return base[str] := info[0]
