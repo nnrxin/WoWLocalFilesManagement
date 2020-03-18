@@ -38,9 +38,9 @@ Gui, MainGui:Font,, 微软雅黑
 Gui, MainGui:Font,, 微软雅黑 Light
 
 
-Gui, MainGui:Font,, 微软雅黑
-Gui, MainGui:Add, Tab3, xm ym w740 h500 c0072E3 AltSubmit vini_MainGui_MainTab HwndhMainTab ggMainTab,   ;主标签
-Gui, MainGui:Font,, 微软雅黑 Light
+Gui, MainGui:Font, c0078D7 bold, 微软雅黑
+Gui, MainGui:Add, Tab3, xm ym w740 h550 AltSubmit vini_MainGui_MainTab HwndhMainTab ggMainTab,   ;主标签
+Gui, MainGui:Font, cDefault norm, 微软雅黑 Light
 
 ;加载各模块及其Tab
 global MODS := []

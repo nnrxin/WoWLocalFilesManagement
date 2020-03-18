@@ -17,8 +17,8 @@ AddMod_WTF:
 	;模块部署
 	global WTF_ITEMS := []    ;储存硬盘扫描后全部的数据
 	global WTF_ITEMS_SELECTED := []    ;从列表中选择的
-	global WTF_ITEMS_SOURCE := []    ;从源角色
-	global WTF_ITEMS_TARGET := []    ;从目标角色
+	global WTF_ITEMS_SOURCES := []    ;从源角色
+	global WTF_ITEMS_TARGETS := []    ;从目标角色
 	
 	;开关模式起始值
 	global WTF_SWITCH_PATHSCAN := 0   ;起始扫描位置
@@ -30,26 +30,71 @@ AddMod_WTF:
 	;LV颜色
 	global LVWTF_COLOR
 	
+	;过程记录
+	global WTF_RECORD := 0    ;过程记录
+	
+	
 	;在MainGui的TAB上:
 	;路径切换
-	Gui, MainGui:Font,, 微软雅黑
+	Gui, MainGui:Font, c010101 bold, 微软雅黑
+	IB_Opts := [[0,0xCCCCCC,,0x838383,,,0xBFBFBF],[,0xFFFFFF],[,0xFFFFFF],[,0xFFFFFF,,"black",,,0x0078D7]]    ;ImageButton配色(反向win10配色)
+	;~ IB_Opts := [[0,0xCCCCCC,,0x838383],[,0xCCE8CF],[,0xCCE8CF],[,0xCCE8CF,,"black"]]    ;ImageButton配色(激活时灰色,未激活时绿色)
 	Gui, MainGui:Add, Button, xm+10 ym+32 w95 h22 Section vvWTF_BTwowPath hwndhWTF_BTwowPath ggWTF_BTscanPath, 魔兽世界路径
-	IB_Opts := [[0,0xCCCCCC,,0x838383],[,0xCCE8CF],[,0xCCE8CF],[,0xCCE8CF,,"black"]]    ;ImageButton配色(激活时灰色,未激活时绿色)
 	ImageButton.Create(hWTF_BTWoWPath, IB_Opts*)   ;彩色按钮
-	Gui, MainGui:Font,, 微软雅黑 Light
-	Gui, MainGui:Add, Edit, x+0 yp hp w540 ReadOnly vvWTF_EDwowPath, 
-	
-	Gui, MainGui:Font,, 微软雅黑
-	Gui, MainGui:Add, Button, xs y+5 w95 h22 vvWTF_BTrealPath hwndhWTF_BTrealPath ggWTF_BTscanPath, 自定义存储路径
+	Gui, MainGui:Font, cDefault norm, 微软雅黑 Light
+	Gui, MainGui:Add, Edit, x+0 yp hp w564 ReadOnly vvWTF_EDwowPath, 
+	Gui, MainGui:Add, Button, x+0 yp hp w60 vvWTF_BTopenPath1 ggWTF_BTopenPath, % "打开目录"
+	Gui, MainGui:Font, c010101 bold, 微软雅黑
+	Gui, MainGui:Add, Button, xs y+2 w95 h22 vvWTF_BTrealPath hwndhWTF_BTrealPath ggWTF_BTscanPath, 自定义存储路径
 	ImageButton.Create(hWTF_BTrealPath, IB_Opts*)   ;彩色按钮
-	Gui, MainGui:Font,, 微软雅黑 Light
-	Gui, MainGui:Add, Edit, x+0 yp hp w540 ReadOnly vvWTF_EDrealPath, 
+	Gui, MainGui:Font, cDefault norm, 微软雅黑 Light
+	Gui, MainGui:Add, Edit, x+0 yp hp w564 ReadOnly vvWTF_EDrealPath, 
+	Gui, MainGui:Add, Button, x+0 yp hp w60 vvWTF_BTopenPath2 ggWTF_BTopenPath, % "打开目录"
+	Gui, MainGui:Font, c010101 bold, 微软雅黑
+	Gui, MainGui:Add, Button, xs y+2 w95 h22 Disabled, WTF备份路径
+	Gui, MainGui:Font, cDefault norm, 微软雅黑 Light
+	Gui, MainGui:Add, Edit, x+0 yp hp w564 ReadOnly vvWTF_EDbackupPath, 
+	Gui, MainGui:Add, Button, x+0 yp hp w60 vvWTF_BTopenPath3 ggWTF_BTopenPath, % "打开目录"
+
+
+	;魔兽版本Logo
+	Gui, MainGui:Add, Picture, xm+10 y+2 w195 h65 Section vvWTF_PICwowLogo, 
 	
+	
+	;通用选项
+	Gui, MainGui:Font, c010101 bold, 微软雅黑
+	Gui, MainGui:Add, GroupBox, xm+210 ys w143 h64, % "通用选项"
+	Gui, MainGui:Font, cDefault norm, 微软雅黑 Light
+	Gui, MainGui:Add, Checkbox, xp+10 yp+17 h20 AltSubmit Section vini_WTF_ifModLua, % "替换文件中的角色名"
+	GuiControl,, ini_WTF_ifModLua, % INI.Init("WTF", "ifModLua", 1)    ;初始化
+	Gui, MainGui:Add, Checkbox, xp y+2 hp AltSubmit vini_WTF_ifBackUp, % "备份目标角色文件"
+	GuiControl,, ini_WTF_ifBackUp, % INI.Init("WTF", "ifBackUp", 1)    ;初始化
+	
+	;配置覆盖选项
+	Gui, MainGui:Font, c010101 bold, 微软雅黑
+	Gui, MainGui:Add, GroupBox, xs+138 ys-17 w372 h64, % "配置覆盖选项"
+	Gui, MainGui:Font, cDefault norm, 微软雅黑 Light
+	Gui, MainGui:Add, Checkbox, xp+10 yp+17 w100 h20 AltSubmit Section vini_WTF_optionA1, % "账号插件配置"
+	GuiControl,, ini_WTF_optionA1, % INI.Init("WTF", "optionA1", 1)    ;初始化
+	Gui, MainGui:Add, Checkbox, xp y+2 wp hp   AltSubmit vini_WTF_optionP1, % "角色插件配置"
+	GuiControl,, ini_WTF_optionP1, % INI.Init("WTF", "optionP1", 1)    ;初始化
+	Gui, MainGui:Add, Checkbox, x+0 ys w100 hp AltSubmit vini_WTF_optionA2, % "账号系统配置"
+	GuiControl,, ini_WTF_optionA2, % INI.Init("WTF", "optionA2", 1)    ;初始化
+	Gui, MainGui:Add, Checkbox, xp y+2 wp hp   AltSubmit vini_WTF_optionP2, % "角色系统配置"
+	GuiControl,, ini_WTF_optionP2, % INI.Init("WTF", "optionP2", 1)    ;初始化
+	Gui, MainGui:Add, Checkbox, x+0 ys w75 hp  AltSubmit vini_WTF_optionA3, % "账号按键"
+	GuiControl,, ini_WTF_optionA3, % INI.Init("WTF", "optionA3", 1)    ;初始化
+	Gui, MainGui:Add, Checkbox, xp y+2 wp hp   AltSubmit vini_WTF_optionP3, % "角色按键"
+	GuiControl,, ini_WTF_optionP3, % INI.Init("WTF", "optionP3", 1)    ;初始化
+	Gui, MainGui:Add, Checkbox, x+0 ys hp      AltSubmit vini_WTF_optionA4, % "账号共享宏"
+	GuiControl,, ini_WTF_optionA4, % INI.Init("WTF", "optionA4", 1)    ;初始化
+	Gui, MainGui:Add, Checkbox, xp y+2 hp      AltSubmit vini_WTF_optionP4, % "角色专属宏"
+	GuiControl,, ini_WTF_optionP4, % INI.Init("WTF", "optionP4", 1)    ;初始化
 	
 	;筛选
-	Gui, MainGui:Font,, 微软雅黑
-	Gui, MainGui:Add, GroupBox, xm+10 y+5 w720 h64, % "列表筛选"
-	Gui, MainGui:Font,, 微软雅黑 Light
+	Gui, MainGui:Font, c010101 bold, 微软雅黑
+	Gui, MainGui:Add, GroupBox, xm+10 y+7 w720 h64, % "列表筛选"
+	Gui, MainGui:Font, cDefault norm, 微软雅黑 Light
 	Gui, MainGui:Add, Text, xp+10 yp+17 w55 h20 Section, 包含字符:
 	Gui, MainGui:Add, Edit, x+0 yp-1 w80 hp vini_WTF_include ggWTF_EDfilter, % INI.Init("WTF", "include")    ;包含
 	Gui, MainGui:Add, Text, xs y+2 w55 hp , 不含字符:
@@ -58,8 +103,6 @@ AddMod_WTF:
 	GuiControl,, ini_WTF_cLV, % INI.Init("WTF", "cLV", 1)    ;颜色开始初始化
 	Gui, MainGui:Add, Button, xp y+1 w40 hp vvWTF_BTclean ggWTF_BTclean hwndhWTF_BTclean Disabled, 重置    ;恢复全部职业
 	ImageButton.Create(hWTF_BTclean, [0,0xE1E1E1,,"red",,,0xADADAD],[,0xE5F1FB],[,0xCCE4F7],[,0xCCCCCC,,0x838383])   ;红字的默认按钮
-
-
 	;筛选框职业图片按钮:
 	picPath := APP_DATA_PATH "\Img\Classicon"
 	Gui, MainGui:Add, Button, x+7 ys-2 w41 h41 ggWTF_BTclass hwndhWTF_BTclass1 vvWTF_BTclass1 ,
@@ -71,22 +114,23 @@ AddMod_WTF:
 		ImageButton.Create(hWTF_BTclass%i%, [0,picPath "\G" i ".png"], [,picPath "\L" i ".png"],, [,picPath "\" i ".ico"])
 	}
 	
+	
 	;主体
-	Gui, MainGui:Font,, 微软雅黑
-	Gui, MainGui:Add, Edit, xm+10 y+13 w310 h22 ReadOnly Section vvWTF_EDsource,
-	Gui, MainGui:Add, Button, xp y+0 wp hp vvWTF_BTaddSource hwndhWTF_BTaddSource ggWTF_BTaddTo, 源角色    ;添加到源角色
+	Gui, MainGui:Font, c010101 bold, 微软雅黑
+	Gui, MainGui:Add, Edit, xm+10 y+8 w310 h22 ReadOnly Section vvWTF_EDsource,
+	Gui, MainGui:Add, Button, xp y+0 wp hp vvWTF_BTaddSource hwndhWTF_BTaddSource ggWTF_BTaddTo, % "源角色"    ;添加到源角色
 	ImageButton.Create(hWTF_BTaddSource, IB_Opts*)   ;彩色按钮
 	
-	Gui, MainGui:Add, Button, x+0 ys w100 h22 vvWTF_BTcopy ggWTF_BTCopyOrSyn Disabled, >>配置覆盖>>
-	Gui, MainGui:Add, Button, xp y+0 wp hp vvWTF_BTsyn ggWTF_BTCopyOrSyn Disabled, <<配置同步<<
+	Gui, MainGui:Add, Button, x+0 ys w100 h22 vvWTF_BTcopy ggWTF_BTCopyOrSyn Disabled, % ">>配置覆盖>>"
+	Gui, MainGui:Add, Button, xp y+0 wp hp vvWTF_BTsyn ggWTF_BTCopyOrSyn Disabled, % "<<配置同步<<"
 	
 	Gui, MainGui:Add, Edit, x+0 ys w310 h22 ReadOnly vvWTF_EDtarget,
-	Gui, MainGui:Add, Button, xp y+0 wp hp vvWTF_BTaddTarget hwndhWTF_BTaddTarget ggWTF_BTaddTo, 目标角色    ;添加到目标角色(默认禁用)
+	Gui, MainGui:Add, Button, xp y+0 wp hp vvWTF_BTaddTarget hwndhWTF_BTaddTarget ggWTF_BTaddTo, % "目标角色"    ;添加到目标角色(默认禁用)
 	ImageButton.Create(hWTF_BTaddTarget, IB_Opts*)   ;彩色按钮
-	Gui, MainGui:Font,, 微软雅黑 Light
+	Gui, MainGui:Font, cDefault norm, 微软雅黑 Light
 	
 	;LV列表创立及准备
-	Gui, MainGui:Add, ListView, xm+10 y+0 w720 h290 Count500 -Multi Grid AltSubmit vvLVWTF HwndhLVWTF ggLVWTF, 职业|角色|服务器|账号|插件账号共享配置文件夹(SavedVariables)链接地址|角色文件夹链接地址|所在WTF的路径
+	Gui, MainGui:Add, ListView, xm+10 y+0 w720 h230 Count500 -Multi Grid AltSubmit vvLVWTF HwndhLVWTF ggLVWTF, 职业|角色|服务器|账号|插件账号共享配置文件夹(SavedVariables)链接地址|角色文件夹链接地址|所在WTF的路径
 	LVWTF_COLOR := New LV_Colors(hLVWTF,,0)    ;LV上色(弊端:无法拖动排序了,需要拦截点击标题栏动作,然后重新绘色)
 	LVWTF_COLOR.switch := ini_WTF_cLV    ;颜色开关的初始化
 	;为LV增加图片列表
@@ -95,7 +139,6 @@ AddMod_WTF:
 	Loop 12  ;加载图片到图像列表里
 		IL_Add(ImageListID, APP_DATA_PATH "\Img\Classicon\" A_Index ".ico")	
 	
-	Gui, MainGui:Font,, 微软雅黑 Light
 return
 
 ;=======================================================================================================================
@@ -103,8 +146,12 @@ return
 ;===========
 GuiInit_WTF:
 	;目录位置刷新
-	GuiControl,, vWTF_EDwowPath, % WOW_PATH "\" WOW_EDITION    ;wow目录刷新
-	GuiControl,, vWTF_EDrealPath, % REAL_PATH "\" WOW_EDITION    ;wow目录确定
+	GuiControl,, vWTF_EDwowPath, % WOW_PATH "\" WOW_EDITION    ;wow路径
+	GuiControl,, vWTF_EDrealPath, % REAL_PATH "\" WOW_EDITION    ;自定义存储路径
+	GuiControl,, vWTF_EDbackupPath, % BACKUP_PATH "\" WOW_EDITION    ;WTF备份路径
+	
+	;魔兽Logo图片刷新
+	gosub, ShowWoWLogo
 	;路径选择
 	GuiControl, Enable%WTF_SWITCH_PATHSCAN%, vWTF_BTwowPath    ;魔兽路径
 	GuiControl, Disable%WTF_SWITCH_PATHSCAN%, vWTF_BTrealPath    ;真实存档路径
@@ -151,6 +198,22 @@ scanNewPath:
 	SB_SetText("WTF目录扫描完毕,列表已刷新")
 	gosub, gLVWTF   ;刷新已选择
 	Gui MainGui:-Disabled	;主窗口启用
+return
+
+;打开路径
+gWTF_BTopenPath:
+	Switch A_GuiControl
+	{
+	Case "vWTF_BTopenPath1":
+		GuiControlGet, path,, vWTF_EDwowPath    ;wow路径
+	Case "vWTF_BTopenPath2":
+		GuiControlGet, path,, vWTF_EDrealPath    ;自定义存储路径
+	Case "vWTF_BTopenPath3":
+		GuiControlGet, path,, vWTF_EDbackupPath    ;WTF备份路径
+	Default:
+	}
+	if InStr(FileExist(path), "D")
+		Run % path
 return
 
 ;扫描WTF文件夹,获取详细信息
@@ -222,6 +285,28 @@ GetFolderMklinkInfo(path)
 	return realPath
 }
 
+
+;=======================================================================================================================
+;魔兽版本Logo |
+;==============
+;显示魔兽logo图片
+ShowWoWLogo:
+	Switch WOW_EDITION
+	{
+	Case "_classic_":
+		picPath := APP_DATA_PATH "\Img\GUI\Classic_Logo.png"
+	Default:
+		if (WOW_EDITION_VERSION >= 90000)
+			picPath := APP_DATA_PATH "\Img\GUI\Onion_Logo.png"
+		else if (WOW_EDITION_VERSION >= 80000)
+			picPath := APP_DATA_PATH "\Img\GUI\BFA_Logo.png"
+		else
+			picPath := WOW_EDITION " " WOW_EDITION_VERSION
+	}
+	GuiControl,, vWTF_PICwowLogo, % picPath
+return
+
+
 ;=======================================================================================================================
 ;筛选 |
 ;=====
@@ -230,6 +315,7 @@ gWTF_EDfilter:
 	Gui MainGui:+Disabled	;主窗口禁用
 	Gui, MainGui:Submit, NoHide
 	RenewWTFLV(hLVWTF, LVWTF_COLOR, WTF_ITEMS, ini_WTF_include, ini_WTF_notInclude, WTF_FILTER_CLASS)    ;LV刷新
+	sleep 100
 	Gui MainGui:-Disabled	;主窗口启用
 return
 
@@ -414,19 +500,19 @@ addLVRowsToEdits:
 	;添加到编辑框
 	if (WTF_SWITCH_LVADD == 0)    ;添加到源 
 	{
-		WTF_ITEMS_SOURCE := CopyArray(WTF_ITEMS_SELECTED)
-		GuiControl,, vWTF_EDsource, % showTxt := GetShowStrFromWTFItems(WTF_ITEMS_SOURCE)    ;编辑框
+		WTF_ITEMS_SOURCES := CopyArray(WTF_ITEMS_SELECTED)
+		GuiControl,, vWTF_EDsource, % showTxt := GetShowStrFromWTFItems(WTF_ITEMS_SOURCES)    ;编辑框
 		SB_SetText("已选择源角色:" showTxt)
 	}
 	else    ;添加到目标
 	{
-		WTF_ITEMS_TARGET := CopyArray(WTF_ITEMS_SELECTED)
-		GuiControl,, vWTF_EDTarget, % showTxt := GetShowStrFromWTFItems(WTF_ITEMS_TARGET)    ;编辑框
-		SB_SetText("已选择目标角色(" WTF_ITEMS_TARGET.Count() "):" showTxt)
+		WTF_ITEMS_TARGETS := CopyArray(WTF_ITEMS_SELECTED)
+		GuiControl,, vWTF_EDTarget, % showTxt := GetShowStrFromWTFItems(WTF_ITEMS_TARGETS)    ;编辑框
+		SB_SetText("已选择目标角色(" WTF_ITEMS_TARGETS.Count() "):" showTxt)
 	}
 	;覆盖/同步按钮的激活控制
-	GuiControl, % "Enable" (WTF_ITEMS_TARGET[1] && WTF_ITEMS_SOURCE[1]), vWTF_BTcopy ;列表同时选取了两侧的选择了文件，按钮才会显示出来
-	GuiControl, % "Enable" (WTF_ITEMS_TARGET[1] && WTF_ITEMS_SOURCE[1]), vWTF_BTsyn ;列表同时选取了两侧的选择了文件，按钮才会显示出来
+	GuiControl, % "Enable" (WTF_ITEMS_TARGETS[1] && WTF_ITEMS_SOURCES[1]), vWTF_BTcopy ;列表同时选取了两侧的选择了文件，按钮才会显示出来
+	GuiControl, % "Enable" (WTF_ITEMS_TARGETS[1] && WTF_ITEMS_SOURCES[1]), vWTF_BTsyn ;列表同时选取了两侧的选择了文件，按钮才会显示出来
 return
 ;由数组获取显示的字符串
 GetShowStrFromWTFItems(items)
@@ -452,8 +538,8 @@ CopyArray(arr)
 ;清空源项目与目标项目
 CleanItems:
 	WTF_ITEMS_SELECTED := []    ;从列表中选择的
-	WTF_ITEMS_SOURCE := []    ;从源角色
-	WTF_ITEMS_TARGET := []    ;从目标角色
+	WTF_ITEMS_SOURCES := []    ;从源角色
+	WTF_ITEMS_TARGETS := []    ;从目标角色
 	GuiControl,, vWTF_EDsource,    ;左编辑框
 	GuiControl,, vWTF_EDTarget,    ;右编辑框
 	GuiControl, Disable, vWTF_BTcopy    ;复制按钮
@@ -492,39 +578,144 @@ AnalyzeItems(sources, targets)
 
 ;配置复制/同步
 gWTF_BTCopyOrSyn:
+	Gui, MainGui:Submit, NoHide
 	;解析源item和目标item
-	maxCount := AnalyzeItems(WTF_ITEMS_SOURCE, WTF_ITEMS_TARGET)
+	maxCount := AnalyzeItems(WTF_ITEMS_SOURCES, WTF_ITEMS_TARGETS)
+	sourceItem := WTF_ITEMS_SOURCES[1]    ;方便后面调用
 	;向两者相同时错误返回
-	if (WTF_ITEMS_SOURCE[1].PlayerPath = WTF_ITEMS_TARGET[1].PlayerPath)
+	if (sourceItem.PlayerPath = WTF_ITEMS_TARGETS[1].PlayerPath)
 	{
 		Gui, MainGui:+OwnDialogs ;各种对话框的从属
 		MsgBox, 16,, 错误！源角色与目标角色不能相同
 		return
 	}
 	;确认信息
-	Gui, MainGui:Submit, NoHide
 	MsgBoxTxt1 := "源角色:`n" vWTF_EDsource "`n`n目标角色:`n" vWTF_EDtarget "`n`n是否进行<<文件复制>>来实现配置的覆盖?`n`n请对重要设置进行备份!!!"
 	MsgBoxTxt2 := "源角色:`n" vWTF_EDsource "`n`n目标角色:`n" vWTF_EDtarget "`n`n是否进行<<文件链接>>来实现配置的同步?`n`n请对重要设置进行备份!!!"
 	MsgBox, 52,, % (A_GuiControl = "vWTF_BTcopy") ? MsgBoxTxt1 : MsgBoxTxt2
 	IfMsgBox Yes
 	{
+		WTF_RECORD := ""    ;记录清空
+		SetTimer, UpdataSB, 100, 10000    ;状态栏更新线程开启
 		if (A_GuiControl = "vWTF_BTcopy")
 			gosub, DoCopy    ;复制
 		else
 			gosub, DoSyn    ;同步
+		SetTimer, UpdataSB, Off    ;状态栏更新线程关闭
 	}
 return
 
+;状态栏更新
+UpdataSB:
+	Gui, MainGui:Default
+	SB_SetText(SB_Text2, 2)    ;状态栏显示变更
+return
 
 ;复制
 DoCopy:
-	MsgBox 复制
+	;计时条设置
+	;~ SB_SetParts((MainGui_W-50)*2//10,(MainGui_W-50)*5//10,50,(MainGui_W-50)*3//10)	;状态栏分2部分
+	SB_SetParts(300)
+	;防止重复复制账号文件夹,先做记录
+	hasCopyedList := ""
+	for i, targetItem in WTF_ITEMS_TARGETS    ;多目标
+	{
+		;状态栏信息变更
+		SB_SetText(targetItem.Player "-" targetItem.Realm, 1)    ;状态栏1显示变更
+		;跳过完全相同的角色
+		if (sourceItem.PlayerPath = targetItem.PlayerPath)
+		{
+			SB_SetText("与源角色重复,跳过...", 2)
+			sleep, 333
+			continue
+		}
+		;账号
+		if (sourceItem.AccountPath <> targetItem.AccountPath)    ;目标账号与源账号不同时
+		{
+			if not InStr(hasCopyedList, targetItem.AccountPath)    ;首次复制该目录时
+			{
+				hasCopyedList .= targetItem.AccountPath "`r`n"    ;添加进记录
+				Loop, Files, % sourceItem.AccountPath "\*", DF    ;源账号文件夹内循环
+				{
+					;跳过
+					if (Instr(A_LoopFileAttrib,"D") and A_LoopFileName <> "SavedVariables")    ;跳过"服务器"文件夹
+					or (A_LoopFileName = "SavedVariables"        and ini_WTF_optionA1 <> 1)    ;账号插件
+					or (InStr(A_LoopFileName, "config-cache.")   and ini_WTF_optionA2 <> 1)    ;账号系统
+					or (InStr(A_LoopFileName, "bindings-cache.") and ini_WTF_optionA3 <> 1)    ;账号按键
+					or (InStr(A_LoopFileName, "macros-cache.")   and ini_WTF_optionA4 <> 1)    ;账号宏
+						continue    
+					;备份
+					if (ini_WTF_ifBackUp == 1)
+					{
+						SB_Text2 := "备份文件:" targetItem.AccountPath "\" A_LoopFileName
+						WTF_RECORD .= "文件备份`t源地址:" targetItem.AccountPath "\" A_LoopFileName "`r`n"
+					}
+					;复制
+					FolderCopyEx(A_LoopFileLongPath, targetItem.AccountPath "\" A_LoopFileName, "overWrite")    ;强力复制账号文件
+					SB_Text2 := "复制文件到:" targetItem.AccountPath "\" A_LoopFileName
+					WTF_RECORD .= "文件复制`t源地址:" A_LoopFileLongPath "`t目标地址:" targetItem.AccountPath "\" A_LoopFileName "`r`n"
+				}
+			}				
+			;Lua修改
+			if (ini_WTF_ifModLua == 1)
+			{
+				SB_Text2 := "修改文件:" targetItem.AccountPath "\SavedVariables\*.lua" "`r`n"
+				WTF_RECORD .= "文件修改`t源地址:" targetItem.AccountPath "\SavedVariables\*.lua" "`r`n"
+				;~ WoW_ChgLuaProfileKeys(AccountR[i] "\SavedVariables", CharacterR[i] " - " RealmR[i], CharacterL " - " RealmL)    ;账号配置档变更
+			}
+		}
+		;角色
+		;备份
+		if (ini_WTF_ifBackUp == 1)
+		{
+			SB_Text2 := "备份文件:" targetItem.AccountPath "\" A_LoopFileName
+			WTF_RECORD .= "文件备份`t源地址:" targetItem.AccountPath "\" A_LoopFileName "`r`n"
+		}
+		Loop, Files, % sourceItem.PlayerPath "\*", DF    ;角色文件夹内循环
+		{
+			;跳过
+			if (A_LoopFileName = "SavedVariables"        and ini_WTF_optionP1 <> 1)    ;角色插件
+			or (A_LoopFileName = "AddOns.txt"            and ini_WTF_optionP1 <> 1)    ;角色插件 开关状态
+			or (InStr(A_LoopFileName, "config-cache.")   and ini_WTF_optionP2 <> 1)    ;角色系统	
+			or (A_LoopFileName = "layout-local.txt"      and ini_WTF_optionP2 <> 1)    ;角色系统 头像位置
+			or (A_LoopFileName = "chat-cache.txt"        and ini_WTF_optionP2 <> 1)    ;角色系统 聊天框
+			or (InStr(A_LoopFileName, "CUFProfiles.txt") and ini_WTF_optionP2 <> 1)    ;角色系统 团队框架
+			or (InStr(A_LoopFileName, "bindings-cache.") and ini_WTF_optionP3 <> 1)    ;角色按键
+			or (InStr(A_LoopFileName, "macros-cache.")   and ini_WTF_optionP4 <> 1)    ;角色宏
+				continue
+			;复制
+			FolderCopyEx(A_LoopFileLongPath, targetItem.PlayerPath "\" A_LoopFileName, "overWrite")    ;强力复制角色文件
+			SB_Text2 := "复制文件到:" targetItem.PlayerPath "\" A_LoopFileName
+			WTF_RECORD .= "文件复制`t源地址:" A_LoopFileLongPath "`t目标地址:" targetItem.PlayerPath "\" A_LoopFileName "`r`n"
+		}
+		;Lua修改
+		if (ini_WTF_ifModLua == 1)
+		{
+			SB_Text2 := "修改文件:" targetItem.PlayerPath "\SavedVariables\*.lua" "`r`n"
+			WTF_RECORD .= "文件修改`t源地址:" targetItem.PlayerPath "\SavedVariables\*.lua" "`r`n"
+			;~ WoW_ChgLuaProfileKeys(AccountR[i] "\SavedVariables", CharacterR[i] " - " RealmR[i], CharacterL " - " RealmL)    ;账号配置档变更
+		}
+	}
+	MsgBox 复制完成
+	Clipboard := WTF_RECORD
 return
+
+
 
 
 ;同步
 DoSyn:
-	MsgBox 同步
+			;~ AltSubmit vini_WTF_optionA1, % "账号插件配置"
+			;~ AltSubmit vini_WTF_optionA2, % "账号系统配置"
+			;~ AltSubmit vini_WTF_optionA3, % "账号按键"
+			;~ AltSubmit vini_WTF_optionA4, % "账号共享宏"
+			;~ AltSubmit vini_WTF_optionP1, % "角色插件配置"
+			;~ AltSubmit vini_WTF_optionP2, % "角色系统配置"
+			;~ AltSubmit vini_WTF_optionP3, % "角色按键"
+			;~ AltSubmit vini_WTF_optionP4, % "角色专属宏"
+			
+			
+	MsgBox 同步完成
 return
 
 
@@ -681,6 +872,6 @@ return
 
 ;GUI尺寸控制:
 GuiSize_WTF:
-	AutoXYWH("wh", "vLVWTF")
+	AutoXYWH("w h", "vLVWTF")
 	gosub, ReColorWTFLV    ;LV重新上色
 return

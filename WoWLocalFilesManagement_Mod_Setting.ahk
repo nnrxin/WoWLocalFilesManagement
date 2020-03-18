@@ -38,24 +38,25 @@ AddMod_Setting:
 	;插件相关
 	global NECESSARY_ADDONS := ["PlayerInfo"]    ;必要的自制插件
 	
-	;自定义存储相关
+	;自定义存储/备份路径相关
 	global REAL_PATH    ;真实存储路径
+	global BACKUP_PATH    ;WTF备份文件保存路径
 	
 	;为主TAB增加记忆功能
 	INI.Init("MainGui", "MainTab", 1)    ;Tab所选标签(默认选Tab1)
 	
 	;在MainGui的TAB上:
-	Gui, MainGui:Font,, 微软雅黑
+	Gui, MainGui:Font, c010101 bold, 微软雅黑
 	Gui, MainGui:Add, GroupBox, xm+10 ym+30 w270 h77, % "本程序的配置数据文件"
-	Gui, MainGui:Font,, 微软雅黑 Light
+	Gui, MainGui:Font, cDefault norm, 微软雅黑 Light
 	Gui, MainGui:Add, Radio, xp+13 yp+22 h22 vini_AppGeneral_UserConfigIniPos ggSET_RDDatePos, 保存到程序所在目录
 	Gui, MainGui:Add, Radio, xp y+1 hp ggSET_RDDatePos Checked, 保存到AppData目录
 	Gui, MainGui:Add, Button, x+2 yp-23 Center w110 h22 ggSET_BTopen1, 打开程序所在目录
 	Gui, MainGui:Add, Button, xp y+1 Center wp hp ggSET_BTopen2, 打开AppData目录
 	
-	Gui, MainGui:Font,, 微软雅黑
+	Gui, MainGui:Font, c010101 bold, 微软雅黑
 	Gui, MainGui:Add, GroupBox, xm+10 y+13 w270 h113, % "WoW游戏路径/版本选择(可拖拽)"
-	Gui, MainGui:Font,, 微软雅黑 Light
+	Gui, MainGui:Font, cDefault norm, 微软雅黑 Light
 	Gui, MainGui:Add, Edit, xp+13 yp+25 w245 h22 ReadOnly Section vini_Setting_WoWPath,
 	Gui, MainGui:Add, Button, xp y+5 w120 hp ggSET_autoGetWoWFolder, 自动识别
 	Gui, MainGui:Add, Button, x+5 yp wp hp ggSET_selectWoWFolder, 手动选择
@@ -63,19 +64,23 @@ AddMod_Setting:
 	Gui, MainGui:Add, Text, x+5 yp w94 vvSET_TXEditionInfo,
 	Gui, MainGui:Add, DDL, x+0 yp-2 w90 vini_Setting_WoWEdition ggSET_DDLWoWEdition, % INI.Init("Setting", "WoWEdition")
 	
-	Gui, MainGui:Font,, 微软雅黑
+	Gui, MainGui:Font, c010101 bold, 微软雅黑
 	Gui, MainGui:Add, GroupBox, xm+10 y+15 w270 h55, % "WoW相关插件"
-	Gui, MainGui:Font,, 微软雅黑 Light
+	Gui, MainGui:Font, cDefault norm, 微软雅黑 Light
 	Gui, MainGui:Add, Text, xp+13 yp+25 w175 h22 Section, % "PlayerInfo(离线获取角色信息)"
 	Gui, MainGui:Add, Button, x+0 yp-2 w70 hp vvSET_BTInstallAddon1 ggSET_BTInstallAddon, 安装
 	
-	Gui, MainGui:Font,, 微软雅黑
-	Gui, MainGui:Add, GroupBox, xm+10 y+13 w270 h85, % "真实存档路径选择(可拖拽)"
-	Gui, MainGui:Font,, 微软雅黑 Light
+	Gui, MainGui:Font, c010101 bold, 微软雅黑
+	Gui, MainGui:Add, GroupBox, xm+10 y+13 w270 h85, % "自定义储存路径选择(可拖拽)"
+	Gui, MainGui:Font, cDefault norm, 微软雅黑 Light
 	Gui, MainGui:Add, Edit, xp+13 yp+25 w245 h22 ReadOnly Section vini_Setting_RealPath,
-	Gui, MainGui:Add, Button, xp y+5 wp hp ggSET_selectrealFolder, 选择路径
+	Gui, MainGui:Add, Button, xp y+5 wp hp ggSET_selectRealFolder, 选择路径
 
-	
+	Gui, MainGui:Font, c010101 bold, 微软雅黑
+	Gui, MainGui:Add, GroupBox, xm+10 y+13 w270 h85, % "WTF备份路径选择(可拖拽)"
+	Gui, MainGui:Font, cDefault norm, 微软雅黑 Light
+	Gui, MainGui:Add, Edit, xp+13 yp+25 w245 h22 ReadOnly Section vini_Setting_BackUpPath,
+	Gui, MainGui:Add, Button, xp y+5 wp hp ggSET_selectBackUpFolder, 选择路径
 	
 	;~ Gui, MainGui:Add, 
 return
@@ -88,9 +93,13 @@ GuiInit_Setting:
 	GuiControl, Choose, ini_MainGui_MainTab, % ini_MainGui_MainTab    ;恢复上次Tab位置
 	;GroupBox<本程序的配置数据文件>:
 	GuiControl,, ini_AppGeneral_UserConfigIniPos, % 2 - ini_AppGeneral_UserConfigIniPos    ;单选框
-	;GroupBox<魔兽世界游戏路径>:
+	;GroupBox<魔兽世界游戏路径><自定义存储路径><WTF备份存储路径>:
 	INI.Init("Setting", "WoWPath")    ;游戏路径
 	INI.Init("Setting", "WoWEdition")    ;游戏版本
+	INI.Init("Setting", "RealPath", "")    ;真实存储位置
+	INI.Init("Setting", "BackUpPath", A_ScriptDir "\WTF_BackUp")    ;WTF备份存储路径,默认本地
+	REAL_PATH := FileExist(ini_Setting_RealPath) ? ini_Setting_RealPath : ""    ;真实存储位置的验证
+	BACKUP_PATH := FileExist(ini_Setting_BackUpPath) ? ini_Setting_BackUpPath : A_ScriptDir "\WTF_BackUp"    ;WTF备份路径的验证
 	if FileExist(ini_Setting_WoWPath "\" ini_Setting_WoWEdition "\WTF")    ;初始化时验证到魔兽地址正确
 	{
 		GuiControl,, ini_Setting_WoWPath, % WOW_PATH := ini_Setting_WoWPath    ;游戏路径
@@ -101,17 +110,6 @@ GuiInit_Setting:
 	else    ;验证失败
 	{
 		gosub, gSET_autoGetWoWFolder
-	}
-	;GroupBox<自定义存储路径>:
-	INI.Init("Setting", "RealPath", "")    ;真实存储位置
-	if FileExist(ini_Setting_RealPath)    ;初始化时验证到真实存储位置地址正确
-	{
-		REAL_PATH := ini_Setting_RealPath    ;游戏路径
-		gosub, DoAfterEditionChange
-	}
-	else    ;验证失败
-	{
-		REAL_PATH := ""
 	}
 return
 
@@ -234,33 +232,12 @@ DoAfterEditionChange:
 	
 	;自定义存储路径生成对应子文件夹
 	gosub, DoAfterResetRealPath
-	
+
+	;WTF备份存储路径生成对应子文件夹
+	gosub, DoAfterResetBackUpPath
+
 	;是否安装了相关插件检测及版本更新
 	gosub, AddonsCheckAndUpdata
-return
-
-;=======================================================================================================================
-;GroupBox<自定义存储路径> |
-;========================
-;自定义安装路径选取
-gSET_selectRealFolder:
-	Gui MainGui:+OwnDialogs    ;对话框出现时禁止操作主GUI
-	FileSelectFolder, newRealFolder,,, 请选择自定义存储目录路径
-	if newRealFolder	;有效值
-	{
-		REAL_PATH := newRealFolder
-		gosub, DoAfterResetRealPath
-	}
-return
-
-;成功选择了自定义存储路径后
-DoAfterResetRealPath:
-	GuiControl,, ini_Setting_RealPath, % REAL_PATH    ;地址栏变更
-	;创建当前版本的子文件夹
-	if FileExist(REAL_PATH) and WOW_EDITION
-	{
-		FileCreateDir, % REAL_PATH "\" WOW_EDITION "\WTF\Account"    ;配置存储路径
-	}
 return
 
 ;=======================================================================================================================
@@ -301,9 +278,53 @@ gSET_BTInstallAddon:
 	Gui MainGui:-Disabled	;主窗口启用
 return
 
+;=======================================================================================================================
+;GroupBox<自定义存储路径> |
+;========================
+;自定义安装路径选取
+gSET_selectRealFolder:
+	Gui MainGui:+OwnDialogs    ;对话框出现时禁止操作主GUI
+	FileSelectFolder, newRealFolder,,, 请选择自定义存储目录路径
+	if newRealFolder	;有效值
+	{
+		REAL_PATH := newRealFolder
+		gosub, DoAfterResetRealPath
+	}
+return
 
+;成功选择了自定义存储路径后
+DoAfterResetRealPath:
+	GuiControl,, ini_Setting_RealPath, % REAL_PATH    ;地址栏变更
+	;创建当前版本的子文件夹
+	if FileExist(REAL_PATH) and WOW_EDITION
+	{
+		FileCreateDir, % REAL_PATH "\" WOW_EDITION "\WTF\Account"    ;配置存储路径
+	}
+return
 
+;=======================================================================================================================
+;GroupBox<WTF备份存储路径> |
+;===========================
+;WTF备份存储路径选取
+gSET_selectBackUpFolder:
+	Gui MainGui:+OwnDialogs    ;对话框出现时禁止操作主GUI
+	FileSelectFolder, newBackUpFolder,,, 请选择自定义存储目录路径
+	if newBackUpFolder	;有效值
+	{
+		BACKUP_PATH := newBackUpFolder
+		gosub, DoAfterResetBackUpPath
+	}
+return
 
+;成功选择了WTF备份存储路径后
+DoAfterResetBackUpPath:
+	GuiControl,, ini_Setting_BackUpPath, % BACKUP_PATH    ;地址栏变更
+	;创建当前版本的子文件夹
+	if WOW_EDITION
+	{
+		FileCreateDir, % BACKUP_PATH "\" WOW_EDITION "\WTF\Account"    ;配置存储路径
+	}
+return
 
 
 ;=======================================================================================================================
@@ -323,6 +344,10 @@ GuiDropFiles_Setting:
 	Case "ini_Setting_RealPath":
 		REAL_PATH := A_GuiEvent
 		gosub, DoAfterResetRealPath
+	;WTF备份目录
+	Case "ini_Setting_BackUpPath":
+		BACKUP_PATH := A_GuiEvent
+		gosub, DoAfterResetBackUpPath
 	Default:
 	}
 return

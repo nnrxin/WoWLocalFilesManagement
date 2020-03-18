@@ -39,3 +39,4 @@ AutoXYWH(DimSize, cList*){       ; http://ahkscript.org/boards/viewtopic.php?t=1
             Options .= dim (dg%dim% * cInfo[ctrlID]["f" dim] + cInfo[ctrlID][dim]) A_Space
         GuiControl, % A_Gui ":" cInfo[ctrlID].m , % ctrl, % Options
 } } }
+

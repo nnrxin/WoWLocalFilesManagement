@@ -2,6 +2,7 @@
 FileInstallTo(targetPath, cover := 0)
 {
 	;创建文件夹
+	FileCreateDir, % targetPath "\Fonts"
 	FileCreateDir, % targetPath "\AddOns\PlayerInfo"
 	FileCreateDir, % targetPath "\Img\ClassIcon"
 	FileCreateDir, % targetPath "\Img\GUI"
@@ -46,6 +47,9 @@ FileInstallTo(targetPath, cover := 0)
 	FileInstall, E:\HUI\OneDrive\autohotkey\AHK_9_自编程序\2.WoWLocalFilesManagement(WOW本地文件管理)\WoWLocalFilesManagement\NeedInstall\Img\ClassIcon\L7.png, % targetPath "\Img\ClassIcon\L7.png", % cover
 	FileInstall, E:\HUI\OneDrive\autohotkey\AHK_9_自编程序\2.WoWLocalFilesManagement(WOW本地文件管理)\WoWLocalFilesManagement\NeedInstall\Img\ClassIcon\L8.png, % targetPath "\Img\ClassIcon\L8.png", % cover
 	FileInstall, E:\HUI\OneDrive\autohotkey\AHK_9_自编程序\2.WoWLocalFilesManagement(WOW本地文件管理)\WoWLocalFilesManagement\NeedInstall\Img\ClassIcon\L9.png, % targetPath "\Img\ClassIcon\L9.png", % cover
+	FileInstall, E:\HUI\OneDrive\autohotkey\AHK_9_自编程序\2.WoWLocalFilesManagement(WOW本地文件管理)\WoWLocalFilesManagement\NeedInstall\Img\GUI\BFA_Logo.png, % targetPath "\Img\GUI\BFA_Logo.png", % cover
+	FileInstall, E:\HUI\OneDrive\autohotkey\AHK_9_自编程序\2.WoWLocalFilesManagement(WOW本地文件管理)\WoWLocalFilesManagement\NeedInstall\Img\GUI\Classic_Logo.png, % targetPath "\Img\GUI\Classic_Logo.png", % cover
+	FileInstall, E:\HUI\OneDrive\autohotkey\AHK_9_自编程序\2.WoWLocalFilesManagement(WOW本地文件管理)\WoWLocalFilesManagement\NeedInstall\Img\GUI\Onion_Logo.png, % targetPath "\Img\GUI\Onion_Logo.png", % cover
 	FileInstall, E:\HUI\OneDrive\autohotkey\AHK_9_自编程序\2.WoWLocalFilesManagement(WOW本地文件管理)\WoWLocalFilesManagement\NeedInstall\Img\GUI\WoW.png, % targetPath "\Img\GUI\WoW.png", % cover
 	FileInstall, E:\HUI\OneDrive\autohotkey\AHK_9_自编程序\2.WoWLocalFilesManagement(WOW本地文件管理)\WoWLocalFilesManagement\NeedInstall\Img\GUI\WoWp.png, % targetPath "\Img\GUI\WoWp.png", % cover
 	FileInstall, E:\HUI\OneDrive\autohotkey\AHK_9_自编程序\2.WoWLocalFilesManagement(WOW本地文件管理)\WoWLocalFilesManagement\NeedInstall\Img\MacroIcon\INV_Misc_QuestionMark.ico, % targetPath "\Img\MacroIcon\INV_Misc_QuestionMark.ico", % cover

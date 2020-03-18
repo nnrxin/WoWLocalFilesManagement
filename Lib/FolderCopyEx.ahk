@@ -4,8 +4,12 @@
 ;mod := "exactal" 完全一致模式,会先删除目标文件夹,然后拷贝过去全部的文件(文件夹). !!!存在数据丢失风险
 FolderCopyEx(path, targetPath, mod := "normal")
 {
+	;简单处理文件
 	if not InStr(FileExist(path), "D")
+	{
+		FileCopy, % path, % targetPath, % (mod = "normal") ? 0 : 1   ;复制文件
 		return
+	}
 	pathLength := StrLen(path)
 	files := []
 	folders := []
