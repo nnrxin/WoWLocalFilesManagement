@@ -125,7 +125,7 @@ return
 ;选择账号保存位置：
 gSET_RDDatePos:
 	Gui, Submit, NoHide
-	USER_CONFIG_INI_PATH := (ini_AppGeneral_UserConfigIniPos == 1)?USER_CONFIG_INI_PATH_LOCAL:USER_CONFIG_INI_PATH_APPDATA   ;改变位置
+	USER_CONFIG_INI_PATH := (ini_AppGeneral_UserConfigIniPos == 1) ? USER_CONFIG_INI_PATH_LOCAL : USER_CONFIG_INI_PATH_APPDATA   ;改变位置
 return
 
 ;打开按钮：
@@ -148,6 +148,8 @@ gSET_selectWoWFolder:
 		WOW_PATH := newWoWFolder
 		gosub, DoAfterResetWoWPath
 	}
+	else
+		gosub, DoAfterCanNotFindWoWFolder
 return
 
 ;自动选择魔兽世界位置
@@ -160,11 +162,12 @@ gSET_autoGetWoWFolder:
 	}
 	;全盘扫描前询问(有些老电脑全盘扫描会卡住)
 	Gui MainGui:+OwnDialogs    ;对话框出现时禁止操作主GUI
-	MsgBox, 4,, 是否进行全盘扫描定位wow目录?
-	IfMsgBox, Yes
-		sleep, 0
-	else
+	MsgBox, 36,, 是否进行全盘扫描定位wow目录?
+	IfMsgBox, No
+	{
+		gosub, gSET_selectWoWFolder
 		return
+	}
 	;开始全盘扫描
 	Gui MainGui:+Disabled    ;主窗口禁用
 	Progress, m b c01 fs12 fm12 zh0 CTWhite CWBlue w600, 扫描中 . . ., 自动定位WoW游戏目录, , 微软雅黑    ;进度条
@@ -176,6 +179,7 @@ gSET_autoGetWoWFolder:
 	if (WoWFolder_AutoGet.Count() == 0)    ;0个结果时
 	{
 		MsgBox 自动扫描没有发现wow路径,请手动设置 T_T
+		gosub, gSET_selectWoWFolder
 	}
 	else
 	{
@@ -189,6 +193,11 @@ return
 ;进度条更新线程：
 RenewProgress: 
 	Progress,, %ProgressSubText%    ;变更
+return
+
+;找不到wow时执行(主要为初次使用准备)
+DoAfterCanNotFindWoWFolder:
+	Gui, MainGui:Show
 return
 
 ;成功找到wow路径后

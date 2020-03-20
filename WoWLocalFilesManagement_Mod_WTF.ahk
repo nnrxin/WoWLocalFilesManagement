@@ -10,6 +10,7 @@
 #Include <Class_ImageButton>    ;加载类(GUI彩色按钮)
 #Include <Class_LV_Colors>    ;加载类(GUI彩色LV)
 #Include <Class_WowAddOnSavedLua>    ;加载类(魔兽世界插件Saved.Lua文件控制)
+#Include <Class_WowAddOnSavedLua_Fast>    ;加载类(魔兽世界插件Saved.Lua文件控制) - 简单快速
 ;=======================================================================================================================
 ;新增模块线程 |
 ;=============
@@ -31,7 +32,7 @@ AddMod_WTF:
 	global LVWTF_COLOR
 	
 	;过程记录
-	global WTF_RECORD := 0    ;过程记录
+	global WTF_RECORD := {}    ;过程记录对象
 	
 	
 	;在MainGui的TAB上:
@@ -121,8 +122,11 @@ AddMod_WTF:
 	Gui, MainGui:Add, Button, xp y+0 wp hp vvWTF_BTaddSource hwndhWTF_BTaddSource ggWTF_BTaddTo, % "源角色"    ;添加到源角色
 	ImageButton.Create(hWTF_BTaddSource, IB_Opts*)   ;彩色按钮
 	
-	Gui, MainGui:Add, Button, x+0 ys w100 h22 vvWTF_BTcopy ggWTF_BTCopyOrSyn Disabled, % ">>配置覆盖>>"
-	Gui, MainGui:Add, Button, xp y+0 wp hp vvWTF_BTsyn ggWTF_BTCopyOrSyn Disabled, % "<<配置同步<<"
+	IB_Opts2 := [[0,0xC7EDCC,,"black",,,0xBFBFBF],[,0x00FF00],[,0x00FF00,,0xFFFFFF],[,0xCCCCCC,,0x838383,,,0xBFBFBF]]    ;ImageButton配色
+	Gui, MainGui:Add, Button, x+0 ys w100 h22 vvWTF_BTcopy hwndhWTF_BTcopy ggWTF_BTCopyOrSyn Disabled, % ">>配置覆盖>>"
+	ImageButton.Create(hWTF_BTcopy, IB_Opts2*)   ;彩色按钮
+	Gui, MainGui:Add, Button, xp y+0 wp hp vvWTF_BTsyn hwndhWTF_BTsyn ggWTF_BTCopyOrSyn Disabled, % "<<配置同步<<"
+	ImageButton.Create(hWTF_BTsyn, IB_Opts2*)   ;彩色按钮
 	
 	Gui, MainGui:Add, Edit, x+0 ys w310 h22 ReadOnly vvWTF_EDtarget,
 	Gui, MainGui:Add, Button, xp y+0 wp hp vvWTF_BTaddTarget hwndhWTF_BTaddTarget ggWTF_BTaddTo, % "目标角色"    ;添加到目标角色(默认禁用)
@@ -139,6 +143,10 @@ AddMod_WTF:
 	Loop 12  ;加载图片到图像列表里
 		IL_Add(ImageListID, APP_DATA_PATH "\Img\Classicon\" A_Index ".ico")	
 	
+	;加载ico图标成位图
+	Loop 12
+		hBitMapClass%A_Index% := LoadPicture(APP_DATA_PATH "\Img\Classicon\" A_Index ".ico") 
+	
 return
 
 ;=======================================================================================================================
@@ -146,9 +154,9 @@ return
 ;===========
 GuiInit_WTF:
 	;目录位置刷新
-	GuiControl,, vWTF_EDwowPath, % WOW_PATH "\" WOW_EDITION    ;wow路径
-	GuiControl,, vWTF_EDrealPath, % REAL_PATH "\" WOW_EDITION    ;自定义存储路径
-	GuiControl,, vWTF_EDbackupPath, % BACKUP_PATH "\" WOW_EDITION    ;WTF备份路径
+	GuiControl,, vWTF_EDwowPath, % WOW_EDITION ? (WOW_PATH "\" WOW_EDITION) : ""        ;wow路径
+	GuiControl,, vWTF_EDrealPath, % WOW_EDITION ? (REAL_PATH "\" WOW_EDITION) : ""      ;自定义存储路径
+	GuiControl,, vWTF_EDbackupPath, % WOW_EDITION ? (BACKUP_PATH "\" WOW_EDITION) : ""  ;WTF备份路径
 	
 	;魔兽Logo图片刷新
 	gosub, ShowWoWLogo
@@ -193,10 +201,10 @@ return
 ;扫描路径
 scanNewPath:
 	Gui MainGui:+Disabled	;主窗口禁用
-	WTF_ITEMS := ScanWTF((WTF_SWITCH_PATHSCAN ? REAL_PATH : WOW_PATH) "\" WOW_EDITION "\WTF")    ;路径扫描
+	WTF_ITEMS := WOW_EDITION ? ScanWTF((WTF_SWITCH_PATHSCAN ? REAL_PATH : WOW_PATH) "\" WOW_EDITION "\WTF") : []    ;路径扫描
 	gosub, gWTF_EDfilter    ;筛选动作
-	SB_SetText("WTF目录扫描完毕,列表已刷新")
-	gosub, gLVWTF   ;刷新已选择
+	;~ SB_SetText("WTF目录扫描完毕,列表已刷新")
+	;~ gosub, gLVWTF   ;刷新已选择
 	Gui MainGui:-Disabled	;主窗口启用
 return
 
@@ -370,8 +378,8 @@ RenewWTFLV(LVHwnd, cLV, items, include := "", notInclude:= "", classFilter := 0)
 		Account          := item.Account           ;账号
 		Realm            := item.Realm             ;服务器
 		Player           := item.Player            ;角色
-		PlayerClass      := WoW_GetClassInfo(item.PlayerClass).nameCNShort  ;职业
-		PlayerClassIndex := WoW_GetClassInfo(item.PlayerClass).index        ;职业序号
+		PlayerClass      := GetWoWClass(item.PlayerClass).nameCNShort  ;职业
+		PlayerClassIndex := GetWoWClass(item.PlayerClass).index        ;职业序号
 		AccountRealPath  := item.AccountRealPath   ;账号链接地址
 		PlayerRealPath   := item.PlayerRealPath    ;角色链接地址
 		WTFPath          := item.WTFPath           ;所在WTF的地址
@@ -427,8 +435,8 @@ ColorLV_ColorRule(cLV, rowIndex)
 {
 	;职业染色
 	LV_GetText(PlayerClass, rowIndex , 1)
-	BCol := WoW_GetClassInfo(PlayerClass).color    ;默认背景颜色=职业颜色
-	TCol := WoW_GetClassInfo(PlayerClass).colorBG    ;默认背景颜色=职业颜色背景色
+	BCol := GetWoWClass(PlayerClass).color    ;默认背景颜色=职业颜色
+	TCol := GetWoWClass(PlayerClass).colorBG    ;默认背景颜色=职业颜色背景色
 	cLV.Cell(rowIndex, 1, BCol, TCol)
 	cLV.Cell(rowIndex, 2, BCol, TCol)
 	cLV.Cell(rowIndex, 3, BCol, TCol)
@@ -443,6 +451,43 @@ ColorLV_ColorRule(cLV, rowIndex)
 		cLV.Cell(rowIndex, 4, 0xE8E8E8)
 }
 
+;返回职业有关信息
+GetWoWClass(str)
+{
+	static base := []
+	str := (str == "") ? "null" : str   ;空值时补一个null直接返回
+	;之前查找过,有存储信息的直接返回
+	if base[str]
+		return base[str]
+	;存储信息里没有的
+	static info := {0:{index:0, color:0xE8E8E8, colorBG:0x000000}   ;默认返回
+		,1: {index:1,  name:"Warrior",     nameCN:"战士",     nameCNShort:"ZS", color:0xC79C6E, colorBG:0x000000}     ;ZS
+		,2: {index:2,  name:"Mage",        nameCN:"法师",     nameCNShort:"FS", color:0x69CCF0, colorBG:0x000000}     ;FS
+		,3: {index:3,  name:"Rogue",       nameCN:"潜行者",   nameCNShort:"DZ", color:0xFFF569, colorBG:0x000000}     ;DZ
+		,4: {index:4,  name:"Priest",      nameCN:"牧师",     nameCNShort:"MS", color:0xFFFFFF, colorBG:0x000000}     ;MS
+		,5: {index:5,  name:"Paladin",     nameCN:"圣骑士",   nameCNShort:"QS", color:0xF58CBA, colorBG:0x000000}     ;QS
+		,6: {index:6,  name:"Shaman",      nameCN:"萨满祭司", nameCNShort:"SM", color:0x0070DE, colorBG:0xFFFFFF}     ;SM
+		,7: {index:7,  name:"Druid",       nameCN:"德鲁伊",   nameCNShort:"XD", color:0xFF7D0A, colorBG:0x000000}     ;XD
+		,8: {index:8,  name:"Hunter",      nameCN:"猎人",     nameCNShort:"LR", color:0xABD473, colorBG:0x000000}     ;LR
+		,9: {index:9,  name:"Warlock",     nameCN:"术士",     nameCNShort:"SS", color:0x9482C9, colorBG:0xFFFFFF}     ;SS
+		,10:{index:10, name:"DeathKnight", nameCN:"死亡骑士", nameCNShort:"DK", color:0xC41F3B, colorBG:0xFFFFFF}     ;DK
+		,11:{index:11, name:"Monk",        nameCN:"武僧",     nameCNShort:"WS", color:0x00FF96, colorBG:0x000000}     ;WS
+		,12:{index:12, name:"DemonHunter", nameCN:"恶魔猎手", nameCNShort:"DH", color:0xA330C9, colorBG:0xFFFFFF}}    ;DH
+	;null时返回默认值
+	if (str = "null")
+		return base[str] := info[0]
+	;info中搜索信息
+	for i, m in info
+	{
+		for k, n in m
+		{
+			if (n = str)
+			{
+				return base[str] := m
+			}
+		}
+	}
+}
 
 
 ;=======================================================================================================================
@@ -556,14 +601,21 @@ AnalyzeItems(sources, targets)
 	s := sources[1]
 	s.AccountPath := s.WTFPath "\Account\" s.Account    ;源账号完整地址
 	s.PlayerPath := s.AccountPath "\" s.Realm "\" s.Player   ;源角色完整地址
-	;账号插件保存文件数量
-	accountLuaCount := 0
-	Loop, Files, % s.AccountPath "\SavedVariables\*.lua"
-		accountLuaCount++
-	;角色插件保存文件数量
-	playerLuaCount := 0
-	Loop, Files, % s.PlayerPath "\SavedVariables\*.lua"
-		playerLuaCount++
+	;统计账号内文件数量
+	accountFilesCount := 0
+	Loop, Files, % s.AccountPath "\SavedVariables\*"
+		accountFilesCount++
+	;统计角色内文件数量
+	playerFilesCount := 0
+	Loop, Files, % s.PlayerPath "\*", FR
+		playerFilesCount++
+	;统计插件Lua数量
+	countLua := 0
+	Loop, Files, % s.AccountPath "\SavedVariables\*.lua"    ;账号SavedVariables
+		countLua++
+	Loop, Files, % s.PlayerPath "\SavedVariables\*.lua"    ;角色SavedVariables
+		countLua++
+	countFull := accountFilesCount + playerFilesCount + countLua    ;一个角色的全部操作数
 	
 	;解析目标item
 	for i, t in targets
@@ -572,70 +624,171 @@ AnalyzeItems(sources, targets)
 		t.PlayerPath := t.AccountPath "\" t.Realm "\" t.Player   ;目标角色完整地址
 	}
 	
-	;返回 [源账号Lua数量, 源角色Lua数量]
-	return [accountLuaCount, playerLuaCount]
+	;返回 [源账号文件数量, 源角色文件数量, Lua总数量]
+	return {countA:accountFilesCount, countP:playerFilesCount, countLua:countLua, countFull:countFull}
+}
+
+;WoW配置快速复制专用函数，快速替换lua中角色名和服务器名
+;需要类#Include <Class_WowAddOnSavedLua_Fast>
+;filePaths可带通配符, o结构为[源角色名,源服务器名,目标角色名,目标服务器名], record为记录信息对象
+ChangeLuaPlayerName(filePaths, o, record := "")  
+{
+	OldBatchLines := A_BatchLines 
+	SetBatchLines, -1  ; 让操作以最快速度运行.
+    Loop, Files, % filePaths    ;文件循环
+    {
+		;记录更新
+		record.i++   
+		;修改文件
+		lua := new WowAddOnSavedLua_Fast(A_LoopFileLongPath)
+		if (lua = "ERROR")    ;加载错误跳过
+			continue
+		options := [["""" o[1] """"            , """" o[3] """"           ]    ;"角色"
+				   ,["""" o[1]  "-"  o[2] """" , """" o[3]  "-"  o[4] """"]    ;"角色-服务器"
+				   ,["""" o[1] " - " o[2] """" , """" o[3] " - " o[4] """"]    ;"角色 - 服务器"
+				   ,["""" o[2]  "-"  o[1] """" , """" o[4]  "-"  o[3] """"]    ;"服务器-角色"
+				   ,["""" o[2] " - " o[1] """" , """" o[4] " - " o[3] """"]]   ;"服务器 - 角色"
+		if lua.StrReplaceBatch(options) > 0    ;批量替换
+			lua.WriteToFile()
+		lua := ""    ;释放内存
+    }
+	SetBatchLines %OldBatchLines%   ;恢复速度
+}
+
+;WoW插件配置的预设档新增
+;filePaths可带通配符, o结构为[源角色名,源服务器名,目标角色名,目标服务器名], record为记录信息对象
+ChangeLuaProfileKeys(filePaths, o, record := "")
+{
+	OldBatchLines := A_BatchLines 
+	SetBatchLines, -1  ; 让操作以最快速度运行.
+    Loop, Files, % filePaths    ;文件循环
+    {
+		;记录更新
+		record.i++   
+		;修改文件
+		lua := new WowAddOnSavedLua_Fast(A_LoopFileLongPath)
+		if (lua = "ERROR")    ;加载错误跳过
+			continue
+		if not (pos1 := lua.InStr("`r`n`t[""profileKeys""] = {"))    ;不存在key时跳过
+			continue
+		if not (pos2 := lua.InStr("`r`n`t},",, pos1))    ;不存在},时跳过(正常是不会发生)
+			continue
+		midText := SubStr(lua.text, pos1, pos2 - pos1 + 4)    ;中间段
+		if not RegExMatch(midText, "i)\t\t\[""(" o[1] "|" o[2] ").*(" o[1] "|" o[2] ")""] = .*\r\n", matchLine)    ;匹配出行
+			continue
+		if RegExMatch(midText, "i)\t\t\[""(" o[3] "|" o[4] ").*(" o[3] "|" o[4] ")""] = .*\r\n", matchLine2)    ;存在目标key
+			midText := StrReplace(midText, matchLine2, "")    ;删除目标
+		newLine := StrReplace(matchLine, o[1], o[3],,1)   ;替换角色 只替换一次
+		newLine := StrReplace(newLine, o[2], o[4],,1)   ;替换服务器 只替换一次
+		newMidText := StrReplace(midText, matchLine, matchLine . newLine)    ;返回被替换的值
+		if (newMidText <> matchLine)    ;中间段发生变化后
+		{
+			lua.text := SubStr(lua.text, 1, pos1 - 1) . newMidText . SubStr(lua.text, pos2 + 4)    ;重新拼合
+			lua.WriteToFile()
+		}
+		lua := midText := newMidText := ""    ;释放内存
+    }
+	lua := midText := newMidText := ""    ;释放内存
+	SetBatchLines %OldBatchLines%   ;恢复速度
 }
 
 ;配置复制/同步
 gWTF_BTCopyOrSyn:
-	Gui, MainGui:Submit, NoHide
+	;发现魔兽窗口时返回
+	if WinExist("ahk_exe Wow.exe") or WinExist("ahk_exe WowClassic.exe")
+	{
+		Gui, MainGui:+OwnDialogs ;各种对话框的从属
+		MsgBox, 16,, 启动失败: 请关闭魔兽窗口后重试
+		return
+	}
 	;解析源item和目标item
-	maxCount := AnalyzeItems(WTF_ITEMS_SOURCES, WTF_ITEMS_TARGETS)
-	sourceItem := WTF_ITEMS_SOURCES[1]    ;方便后面调用
+	WTF_RECORD := AnalyzeItems(WTF_ITEMS_SOURCES, WTF_ITEMS_TARGETS)
+	src := WTF_ITEMS_SOURCES[1]    ;方便后面调用
 	;向两者相同时错误返回
-	if (sourceItem.PlayerPath = WTF_ITEMS_TARGETS[1].PlayerPath)
+	if (src.PlayerPath = WTF_ITEMS_TARGETS[1].PlayerPath and WTF_ITEMS_TARGETS.Count() == 1)
 	{
 		Gui, MainGui:+OwnDialogs ;各种对话框的从属
 		MsgBox, 16,, 错误！源角色与目标角色不能相同
 		return
 	}
+	;职业匹配警告
+	if src.PlayerClass
+	{
+		msgStr := ""
+		for i, tar in WTF_ITEMS_TARGETS
+		{
+			if (tar.PlayerClass and tar.PlayerClass <> src.PlayerClass)    ;职业不同
+				msgStr .= tar.PlayerClass " " tar.Player "-" tar.Realm "(" tar.Account ")`r`n"
+		}
+		if msgStr
+		{
+			Gui, MainGui:+OwnDialogs ;各种对话框的从属
+			MsgBox, 36,, % "警告！下列目标角色与源角色职业不一致,是否继续?`n`n" msgStr
+			IfMsgBox No
+				return
+		}
+	}
 	;确认信息
+	Gui, MainGui:Submit, NoHide
 	MsgBoxTxt1 := "源角色:`n" vWTF_EDsource "`n`n目标角色:`n" vWTF_EDtarget "`n`n是否进行<<文件复制>>来实现配置的覆盖?`n`n请对重要设置进行备份!!!"
 	MsgBoxTxt2 := "源角色:`n" vWTF_EDsource "`n`n目标角色:`n" vWTF_EDtarget "`n`n是否进行<<文件链接>>来实现配置的同步?`n`n请对重要设置进行备份!!!"
+	Gui, MainGui:+OwnDialogs ;各种对话框的从属
 	MsgBox, 52,, % (A_GuiControl = "vWTF_BTcopy") ? MsgBoxTxt1 : MsgBoxTxt2
 	IfMsgBox Yes
 	{
-		WTF_RECORD := ""    ;记录清空
-		SetTimer, UpdataSB, 100, 10000    ;状态栏更新线程开启
+		Gui MainGui:+Disabled	;主窗口禁用
+		;状态栏修改
+		SB_SetParts(200, 150)    ;状态栏分3部分
+		SB_SetProgress(0, 1, "show Range0-" WTF_RECORD.countFull * WTF_ITEMS_TARGETS.Count())    ;状态栏上增加计时条
+		SetTimer, UpdataSB, 10, 10000    ;状态栏更新线程开启
+		;记录重置
+		WTF_RECORD.cmdList := "", WTF_RECORD.i := 0
+		;执行动作
 		if (A_GuiControl = "vWTF_BTcopy")
 			gosub, DoCopy    ;复制
 		else
 			gosub, DoSyn    ;同步
-		SetTimer, UpdataSB, Off    ;状态栏更新线程关闭
+		;状态栏恢复,输出结论
+		SB_SetParts()    ;状态栏进度条恢复
+		SB_SetText("完成")
+		SB_SetProgress(0, 1, "hide")    ;状态栏上计时条隐藏
+		Clipboard := WTF_RECORD.cmdList "`n`n" WTF_RECORD.i " " WTF_RECORD.countFull
+		Gui MainGui:-Disabled	;主窗口启用
 	}
 return
 
 ;状态栏更新
 UpdataSB:
 	Gui, MainGui:Default
-	SB_SetText(SB_Text2, 2)    ;状态栏显示变更
+	SB_SetProgress(WTF_RECORD.i, 1)
+	SB_SetText(SB_Text2, 3)    ;状态栏显示变更
 return
 
 ;复制
 DoCopy:
-	;计时条设置
-	;~ SB_SetParts((MainGui_W-50)*2//10,(MainGui_W-50)*5//10,50,(MainGui_W-50)*3//10)	;状态栏分2部分
-	SB_SetParts(300)
 	;防止重复复制账号文件夹,先做记录
 	hasCopyedList := ""
-	for i, targetItem in WTF_ITEMS_TARGETS    ;多目标
+	for i, tar in WTF_ITEMS_TARGETS    ;多目标
 	{
 		;状态栏信息变更
-		SB_SetText(targetItem.Player "-" targetItem.Realm, 1)    ;状态栏1显示变更
+		classI := GetWoWClass(tar.PlayerClass).index
+		SB_SetIcon("HBITMAP:" hBitMapClass%classI%, 1, 2)
+		SB_SetText(tar.Player "-" tar.Realm, 2)    ;状态栏1显示变更
 		;跳过完全相同的角色
-		if (sourceItem.PlayerPath = targetItem.PlayerPath)
+		if (src.PlayerPath = tar.PlayerPath)
 		{
-			SB_SetText("与源角色重复,跳过...", 2)
+			WTF_RECORD.i += WTF_RECORD.countFull
+			SB_SetText("与源角色重复,跳过...", 3)
 			sleep, 333
 			continue
 		}
 		;账号
-		if (sourceItem.AccountPath <> targetItem.AccountPath)    ;目标账号与源账号不同时
+		if (src.AccountPath <> tar.AccountPath)    ;目标账号与源账号不同时
 		{
-			if not InStr(hasCopyedList, targetItem.AccountPath)    ;首次复制该目录时
+			if not InStr(hasCopyedList, tar.AccountPath)    ;首次复制该目录时
 			{
-				hasCopyedList .= targetItem.AccountPath "`r`n"    ;添加进记录
-				Loop, Files, % sourceItem.AccountPath "\*", DF    ;源账号文件夹内循环
+				hasCopyedList .= tar.AccountPath "`r`n"    ;添加进记录
+				Loop, Files, % src.AccountPath "\*", DF    ;源账号文件夹内循环
 				{
 					;跳过
 					if (Instr(A_LoopFileAttrib,"D") and A_LoopFileName <> "SavedVariables")    ;跳过"服务器"文件夹
@@ -647,31 +800,34 @@ DoCopy:
 					;备份
 					if (ini_WTF_ifBackUp == 1)
 					{
-						SB_Text2 := "备份文件:" targetItem.AccountPath "\" A_LoopFileName
-						WTF_RECORD .= "文件备份`t源地址:" targetItem.AccountPath "\" A_LoopFileName "`r`n"
+						SB_Text2 := "备份文件:" tar.AccountPath "\" A_LoopFileName
+						WTF_RECORD.cmdList .= "文件备份`t源地址:" tar.AccountPath "\" A_LoopFileName "`r`n"
 					}
 					;复制
-					FolderCopyEx(A_LoopFileLongPath, targetItem.AccountPath "\" A_LoopFileName, "overWrite")    ;强力复制账号文件
-					SB_Text2 := "复制文件到:" targetItem.AccountPath "\" A_LoopFileName
-					WTF_RECORD .= "文件复制`t源地址:" A_LoopFileLongPath "`t目标地址:" targetItem.AccountPath "\" A_LoopFileName "`r`n"
+					FolderCopyEx(A_LoopFileLongPath, tar.AccountPath "\" A_LoopFileName, "overWrite")    ;强力复制账号文件
+					SB_Text2 := "复制文件到:" tar.AccountPath "\" A_LoopFileName
+					WTF_RECORD.cmdList .= "文件复制`t源地址:" A_LoopFileLongPath "`t目标地址:" tar.AccountPath "\" A_LoopFileName "`r`n"
 				}
-			}				
-			;Lua修改
-			if (ini_WTF_ifModLua == 1)
-			{
-				SB_Text2 := "修改文件:" targetItem.AccountPath "\SavedVariables\*.lua" "`r`n"
-				WTF_RECORD .= "文件修改`t源地址:" targetItem.AccountPath "\SavedVariables\*.lua" "`r`n"
-				;~ WoW_ChgLuaProfileKeys(AccountR[i] "\SavedVariables", CharacterR[i] " - " RealmR[i], CharacterL " - " RealmL)    ;账号配置档变更
 			}
 		}
+		WTF_RECORD.i += WTF_RECORD.countP   ;账号拷贝完成
+		;账号Lua修改
+		if (ini_WTF_ifModLua == 1 and ini_WTF_optionA1 == 1)
+		{
+			SB_Text2 := "修改文件:" tar.AccountPath "\SavedVariables\*.lua" "`r`n"
+			WTF_RECORD.cmdList .= "文件修改`t源地址:" tar.AccountPath "\SavedVariables\*.lua" "`r`n"
+			ChangeLuaProfileKeys(tar.AccountPath "\SavedVariables\*.lua", [src.Player, src.Realm, tar.Player, tar.Realm], WTF_RECORD)
+		}
+		else
+			WTF_RECORD.i += WTF_RECORD.countLua   ;跳过修改Lua  ! 只跳过一次
 		;角色
 		;备份
 		if (ini_WTF_ifBackUp == 1)
 		{
-			SB_Text2 := "备份文件:" targetItem.AccountPath "\" A_LoopFileName
-			WTF_RECORD .= "文件备份`t源地址:" targetItem.AccountPath "\" A_LoopFileName "`r`n"
+			SB_Text2 := "备份文件:" tar.AccountPath "\" A_LoopFileName
+			WTF_RECORD.cmdList .= "文件备份`t源地址:" tar.AccountPath "\" A_LoopFileName "`r`n"
 		}
-		Loop, Files, % sourceItem.PlayerPath "\*", DF    ;角色文件夹内循环
+		Loop, Files, % src.PlayerPath "\*", DF    ;角色文件夹内循环
 		{
 			;跳过
 			if (A_LoopFileName = "SavedVariables"        and ini_WTF_optionP1 <> 1)    ;角色插件
@@ -684,20 +840,19 @@ DoCopy:
 			or (InStr(A_LoopFileName, "macros-cache.")   and ini_WTF_optionP4 <> 1)    ;角色宏
 				continue
 			;复制
-			FolderCopyEx(A_LoopFileLongPath, targetItem.PlayerPath "\" A_LoopFileName, "overWrite")    ;强力复制角色文件
-			SB_Text2 := "复制文件到:" targetItem.PlayerPath "\" A_LoopFileName
-			WTF_RECORD .= "文件复制`t源地址:" A_LoopFileLongPath "`t目标地址:" targetItem.PlayerPath "\" A_LoopFileName "`r`n"
+			FolderCopyEx(A_LoopFileLongPath, tar.PlayerPath "\" A_LoopFileName, "overWrite")    ;强力复制角色文件
+			SB_Text2 := "复制文件到:" tar.PlayerPath "\" A_LoopFileName
+			WTF_RECORD.cmdList .= "文件复制`t源地址:" A_LoopFileLongPath "`t目标地址:" tar.PlayerPath "\" A_LoopFileName "`r`n"
 		}
-		;Lua修改
-		if (ini_WTF_ifModLua == 1)
+		WTF_RECORD.i += WTF_RECORD.countA   ;角色拷贝完成
+		;角色Lua修改
+		if (ini_WTF_ifModLua == 1 and ini_WTF_optionP1 == 1)
 		{
-			SB_Text2 := "修改文件:" targetItem.PlayerPath "\SavedVariables\*.lua" "`r`n"
-			WTF_RECORD .= "文件修改`t源地址:" targetItem.PlayerPath "\SavedVariables\*.lua" "`r`n"
-			;~ WoW_ChgLuaProfileKeys(AccountR[i] "\SavedVariables", CharacterR[i] " - " RealmR[i], CharacterL " - " RealmL)    ;账号配置档变更
+			SB_Text2 := "修改文件:" tar.PlayerPath "\SavedVariables\*.lua" "`r`n"
+			WTF_RECORD.cmdList .= "文件修改`t源地址:" tar.PlayerPath "\SavedVariables\*.lua" "`r`n"
+			ChangeLuaPlayerName(tar.PlayerPath "\SavedVariables\*.lua", [src.Player, src.Realm, tar.Player, tar.Realm], WTF_RECORD)
 		}
 	}
-	MsgBox 复制完成
-	Clipboard := WTF_RECORD
 return
 
 
