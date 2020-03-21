@@ -26,7 +26,7 @@ SetWorkingDir, % A_ScriptDir
 ;APP基本信息
 global APP_NAME      := "WoWLocalFilesManagement"    ;APP名称
 global APP_NAME_CN   := "魔兽世界本地文件管理工具WOW-LFM"    ;APP中文名称
-global APP_VERSION   := 0.2                          ;当前版本
+global APP_VERSION   := 0.4                          ;当前版本
 global APP_DATA_PATH := A_AppData "\" APP_NAME       ;在系统AppData的保存位置
 FileCreateDir, % APP_DATA_PATH                       ;路径不存在时需要新建
 
@@ -38,6 +38,7 @@ if WinExist("ahk_exe Wow.exe") or WinExist("ahk_exe WowClassic.exe")    ;发现�
 }
 
 ;安装必要的组件
+#Include WoWLocalFilesManagement_InstallFile.ahk
 FileInstallTo(APP_DATA_PATH)
 
 ;退出时保存设置信息
@@ -46,12 +47,12 @@ OnExit, DoBeforeExitApp
 
 
 ;创建主GUI
-Gui, MainGui:New, +Resize +MinSize763x450 +HwndhMainGui
+Gui, MainGui:New,+HwndhMainGui
 Gui, MainGui:Font,, 微软雅黑
 Gui, MainGui:Font,, 微软雅黑 Light
 
 Gui, MainGui:Font, c0078D7 bold, 微软雅黑
-Gui, MainGui:Add, Tab3, xm ym w740 h550 AltSubmit vini_MainGui_MainTab HwndhMainTab ggMainTab,   ;主标签
+Gui, MainGui:Add, Tab3, xm ym w760 h600 AltSubmit vini_MainGui_MainTab HwndhMainTab ggMainTab,   ;主标签
 Gui, MainGui:Font, cDefault norm, 微软雅黑 Light
 
 ;加载各模块及其Tab
@@ -62,20 +63,17 @@ GuiAddTabMod("MainGui", "ini_MainGui_MainTab", MODS, "WTF", "WTF")
 Gui, MainGui:Font, italic    ;斜体
 Gui, MainGui:Add, StatusBar, hwndhStatusBar
 gui, MainGui:Font, norm    ;恢复
-Gui, MainGui:Show, Hide, % APP_NAME_CN " ver" APP_VERSION
+Gui, MainGui:Show,, % APP_NAME_CN " ver" APP_VERSION
 
 ;GUI初始化
 gosub, GuiInit    
 
-;初始化完毕后显示主界面
-Gui, MainGui:Show
 
 ;=========================
 return    ;自动运行段结束 |
 ;=======================================================================================================================
 ;=======================================================================================================================
-#Include WoWLocalFilesManagement_InstallFile.ahk    ;加载类(ini自动保存)
-;=======================================================================================================================
+
 ;=======================================================================================================================
 ;退出前自动运行段 |
 ;================

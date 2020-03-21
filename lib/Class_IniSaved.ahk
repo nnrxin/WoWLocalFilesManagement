@@ -13,7 +13,8 @@
 		this.filePath := filePath
 		this.VarList := []
 	}
-
+	
+	;初始化
 	Init(Section := "", Key := "", Default := "")
 	{
 		global
@@ -23,13 +24,15 @@
 		this.VarList.push({iniVarName:iniVarName, Section:Section, Key:Key})
 		return OutputVar
 	}
-
+	
+	;仅读取
 	Read(Section := "", Key := "", Default := "")
 	{
 		IniRead, OutputVar, % this.filePath, % Section, % Key, % (Default = "") ? A_Space : Default
 		return OutputVar
 	}
 	
+	;保存全部
 	SaveAll()
 	{	
 		for i, v in this.VarList

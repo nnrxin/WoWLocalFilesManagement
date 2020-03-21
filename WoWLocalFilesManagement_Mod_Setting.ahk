@@ -39,7 +39,7 @@ AddMod_Setting:
 	global NECESSARY_ADDONS := ["PlayerInfo"]    ;必要的自制插件
 	
 	;自定义存储/备份路径相关
-	global REAL_PATH    ;真实存储路径
+	global SAVED_PATH    ;真实存储路径
 	global BACKUP_PATH    ;WTF备份文件保存路径
 	
 	;为主TAB增加记忆功能
@@ -47,7 +47,7 @@ AddMod_Setting:
 	
 	;在MainGui的TAB上:
 	Gui, MainGui:Font, c010101 bold, 微软雅黑
-	Gui, MainGui:Add, GroupBox, xm+10 ym+30 w270 h77, % "本程序的配置数据文件"
+	Gui, MainGui:Add, GroupBox, xm+10 ym+25 w270 h77, % "本程序的配置数据文件"
 	Gui, MainGui:Font, cDefault norm, 微软雅黑 Light
 	Gui, MainGui:Add, Radio, xp+13 yp+22 h22 vini_AppGeneral_UserConfigIniPos ggSET_RDDatePos, 保存到程序所在目录
 	Gui, MainGui:Add, Radio, xp y+1 hp ggSET_RDDatePos Checked, 保存到AppData目录
@@ -73,7 +73,7 @@ AddMod_Setting:
 	Gui, MainGui:Font, c010101 bold, 微软雅黑
 	Gui, MainGui:Add, GroupBox, xm+10 y+13 w270 h85, % "自定义储存路径选择(可拖拽)"
 	Gui, MainGui:Font, cDefault norm, 微软雅黑 Light
-	Gui, MainGui:Add, Edit, xp+13 yp+25 w245 h22 ReadOnly Section vini_Setting_RealPath,
+	Gui, MainGui:Add, Edit, xp+13 yp+25 w245 h22 ReadOnly Section vini_Setting_SavedPath,
 	Gui, MainGui:Add, Button, xp y+5 wp hp ggSET_selectRealFolder, 选择路径
 
 	Gui, MainGui:Font, c010101 bold, 微软雅黑
@@ -96,10 +96,10 @@ GuiInit_Setting:
 	;GroupBox<魔兽世界游戏路径><自定义存储路径><WTF备份存储路径>:
 	INI.Init("Setting", "WoWPath")    ;游戏路径
 	INI.Init("Setting", "WoWEdition")    ;游戏版本
-	INI.Init("Setting", "RealPath", "")    ;真实存储位置
-	INI.Init("Setting", "BackUpPath", A_ScriptDir "\WTF_BackUp")    ;WTF备份存储路径,默认本地
-	REAL_PATH := FileExist(ini_Setting_RealPath) ? ini_Setting_RealPath : ""    ;真实存储位置的验证
-	BACKUP_PATH := FileExist(ini_Setting_BackUpPath) ? ini_Setting_BackUpPath : A_ScriptDir "\WTF_BackUp"    ;WTF备份路径的验证
+	INI.Init("Setting", "SavedPath", A_ScriptDir "\WOW_Saved")    ;真实存储位置
+	INI.Init("Setting", "BackUpPath", A_ScriptDir "\WOW_WTFBackUp")    ;WTF备份存储路径,默认本地
+	SAVED_PATH := FileExist(ini_Setting_SavedPath) ? ini_Setting_SavedPath : A_ScriptDir "\WOW_Saved"    ;真实存储位置的验证
+	BACKUP_PATH := FileExist(ini_Setting_BackUpPath) ? ini_Setting_BackUpPath : A_ScriptDir "\WOW_WTFBackUp"    ;WTF备份路径的验证
 	if FileExist(ini_Setting_WoWPath "\" ini_Setting_WoWEdition "\WTF")    ;初始化时验证到魔兽地址正确
 	{
 		GuiControl,, ini_Setting_WoWPath, % WOW_PATH := ini_Setting_WoWPath    ;游戏路径
@@ -148,8 +148,6 @@ gSET_selectWoWFolder:
 		WOW_PATH := newWoWFolder
 		gosub, DoAfterResetWoWPath
 	}
-	else
-		gosub, DoAfterCanNotFindWoWFolder
 return
 
 ;自动选择魔兽世界位置
@@ -195,10 +193,6 @@ RenewProgress:
 	Progress,, %ProgressSubText%    ;变更
 return
 
-;找不到wow时执行(主要为初次使用准备)
-DoAfterCanNotFindWoWFolder:
-	Gui, MainGui:Show
-return
 
 ;成功找到wow路径后
 DoAfterResetWoWPath:
@@ -240,7 +234,7 @@ DoAfterEditionChange:
 	GuiControl,, vSET_TXEditionInfo, % WOW_EDITION_CN[WOW_EDITION] "(" WOW_EDITION_VERSION ")"
 	
 	;自定义存储路径生成对应子文件夹
-	gosub, DoAfterResetRealPath
+	gosub, DoAfterResetSavedPath
 
 	;WTF备份存储路径生成对应子文件夹
 	gosub, DoAfterResetBackUpPath
@@ -296,18 +290,18 @@ gSET_selectRealFolder:
 	FileSelectFolder, newRealFolder,,, 请选择自定义存储目录路径
 	if newRealFolder	;有效值
 	{
-		REAL_PATH := newRealFolder
-		gosub, DoAfterResetRealPath
+		SAVED_PATH := newRealFolder
+		gosub, DoAfterResetSavedPath
 	}
 return
 
 ;成功选择了自定义存储路径后
-DoAfterResetRealPath:
-	GuiControl,, ini_Setting_RealPath, % REAL_PATH    ;地址栏变更
+DoAfterResetSavedPath:
+	GuiControl,, ini_Setting_SavedPath, % SAVED_PATH    ;地址栏变更
 	;创建当前版本的子文件夹
-	if FileExist(REAL_PATH) and WOW_EDITION
+	if WOW_EDITION
 	{
-		FileCreateDir, % REAL_PATH "\" WOW_EDITION "\WTF\Account"    ;配置存储路径
+		FileCreateDir, % SAVED_PATH "\" WOW_EDITION "\WTF\Account"    ;配置存储路径
 	}
 return
 
@@ -331,7 +325,7 @@ DoAfterResetBackUpPath:
 	;创建当前版本的子文件夹
 	if WOW_EDITION
 	{
-		FileCreateDir, % BACKUP_PATH "\" WOW_EDITION "\WTF\Account"    ;配置存储路径
+		FileCreateDir, % BACKUP_PATH "\" WOW_EDITION "\WTF"    ;配置存储路径
 	}
 return
 
@@ -350,9 +344,9 @@ GuiDropFiles_Setting:
 		WOW_PATH := A_GuiEvent
 		gosub, DoAfterResetWoWPath
 	;自定义目录
-	Case "ini_Setting_RealPath":
-		REAL_PATH := A_GuiEvent
-		gosub, DoAfterResetRealPath
+	Case "ini_Setting_SavedPath":
+		SAVED_PATH := A_GuiEvent
+		gosub, DoAfterResetSavedPath
 	;WTF备份目录
 	Case "ini_Setting_BackUpPath":
 		BACKUP_PATH := A_GuiEvent

@@ -7,8 +7,10 @@ FolderCopyEx(path, targetPath, mod := "normal")
 	;简单处理文件
 	if not InStr(FileExist(path), "D")
 	{
+		SplitPath, targetPath,, OutDir
+		FileCreateDir, % OutDir
 		FileCopy, % path, % targetPath, % (mod = "normal") ? 0 : 1   ;复制文件
-		return
+		return 1
 	}
 	pathLength := StrLen(path)
 	files := []
@@ -57,6 +59,11 @@ FolderCopyEx(path, targetPath, mod := "normal")
 	for i, v in folders
         FileCreateDir, % targetPath . v    ;创建文件夹
 	;再安装文件
+	count := 0
 	for i, v in files
+	{
         FileCopy, % path . v, % targetPath . v, % overWrite    ;复制文件
+		count++
+	}
+	return count
 }
