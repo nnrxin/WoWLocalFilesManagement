@@ -52,13 +52,14 @@ Gui, MainGui:Font,, 微软雅黑
 Gui, MainGui:Font,, 微软雅黑 Light
 
 Gui, MainGui:Font, c0078D7 bold, 微软雅黑
-Gui, MainGui:Add, Tab3, xm ym w760 h600 AltSubmit vini_MainGui_MainTab HwndhMainTab ggMainTab,   ;主标签
+Gui, MainGui:Add, Tab3, xm ym w760 h630 AltSubmit vini_MainGui_MainTab HwndhMainTab ggMainTab,   ;主标签
 Gui, MainGui:Font, cDefault norm, 微软雅黑 Light
 
 ;加载各模块及其Tab
 global MODS := []
 GuiAddTabMod("MainGui", "ini_MainGui_MainTab", MODS, "基本设置", "Setting")
 GuiAddTabMod("MainGui", "ini_MainGui_MainTab", MODS, "WTF", "WTF")
+GuiAddTabMod("MainGui", "ini_MainGui_MainTab", MODS, "WTF备份管理", "WTFbackup")
 
 Gui, MainGui:Font, italic    ;斜体
 Gui, MainGui:Add, StatusBar, hwndhStatusBar
@@ -155,3 +156,4 @@ GuiAddTabMod(G, tab, ByRef mods, tabName, modName)
 ;加载模块文件：
 #Include WoWLocalFilesManagement_Mod_Setting.ahk
 #Include WoWLocalFilesManagement_Mod_WTF.ahk
+#Include WoWLocalFilesManagement_Mod_WTFbackup.ahk

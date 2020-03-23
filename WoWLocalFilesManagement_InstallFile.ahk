@@ -47,6 +47,9 @@ FileInstallTo(targetPath, cover := 0)
 	FileInstall, E:\HUI\OneDrive\autohotkey\AHK_9_自编程序\2.WoWLocalFilesManagement(WOW本地文件管理)\WoWLocalFilesManagement\NeedInstall\Img\ClassIcon\L7.png, % targetPath "\Img\ClassIcon\L7.png", % cover
 	FileInstall, E:\HUI\OneDrive\autohotkey\AHK_9_自编程序\2.WoWLocalFilesManagement(WOW本地文件管理)\WoWLocalFilesManagement\NeedInstall\Img\ClassIcon\L8.png, % targetPath "\Img\ClassIcon\L8.png", % cover
 	FileInstall, E:\HUI\OneDrive\autohotkey\AHK_9_自编程序\2.WoWLocalFilesManagement(WOW本地文件管理)\WoWLocalFilesManagement\NeedInstall\Img\ClassIcon\L9.png, % targetPath "\Img\ClassIcon\L9.png", % cover
+	FileInstall, E:\HUI\OneDrive\autohotkey\AHK_9_自编程序\2.WoWLocalFilesManagement(WOW本地文件管理)\WoWLocalFilesManagement\NeedInstall\Img\GUI\Arrow.png, % targetPath "\Img\GUI\Arrow.png", % cover
+	FileInstall, E:\HUI\OneDrive\autohotkey\AHK_9_自编程序\2.WoWLocalFilesManagement(WOW本地文件管理)\WoWLocalFilesManagement\NeedInstall\Img\GUI\Arrowg.png, % targetPath "\Img\GUI\Arrowg.png", % cover
+	FileInstall, E:\HUI\OneDrive\autohotkey\AHK_9_自编程序\2.WoWLocalFilesManagement(WOW本地文件管理)\WoWLocalFilesManagement\NeedInstall\Img\GUI\Arrowp.png, % targetPath "\Img\GUI\Arrowp.png", % cover
 	FileInstall, E:\HUI\OneDrive\autohotkey\AHK_9_自编程序\2.WoWLocalFilesManagement(WOW本地文件管理)\WoWLocalFilesManagement\NeedInstall\Img\GUI\Folder.png, % targetPath "\Img\GUI\Folder.png", % cover
 	FileInstall, E:\HUI\OneDrive\autohotkey\AHK_9_自编程序\2.WoWLocalFilesManagement(WOW本地文件管理)\WoWLocalFilesManagement\NeedInstall\Img\GUI\Folderp.png, % targetPath "\Img\GUI\Folderp.png", % cover
 	FileInstall, E:\HUI\OneDrive\autohotkey\AHK_9_自编程序\2.WoWLocalFilesManagement(WOW本地文件管理)\WoWLocalFilesManagement\NeedInstall\Img\GUI\Logo_BFA.png, % targetPath "\Img\GUI\Logo_BFA.png", % cover

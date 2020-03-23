@@ -17,13 +17,10 @@ AddMod_Setting:
 	;模块部署
 	;配置保存位置
 	global APP_INI := new IniSaved(APP_DATA_PATH "\" APP_NAME "_baseConfig.ini")    ;app配置ini
-	global USER_CONFIG_INI_PATH_APPDATA := APP_DATA_PATH "\" APP_NAME "_config.ini"  ;用户配置文件AppData路径(默认)
-	global USER_CONFIG_INI_PATH_LOCAL   := A_ScriptDir "\" APP_NAME "_config.ini"    ;用户配置文件本地路径
-	APP_INI.Init("AppGeneral", "UserConfigIniPos", 1)    ;玩家信息保存位置(1:Local, 2:AppData)
-	global USER_CONFIG_INI_PATH := (ini_AppGeneral_UserConfigIniPos == 1)
-		? USER_CONFIG_INI_PATH_LOCAL
-		: USER_CONFIG_INI_PATH_APPDATA    ;初始化用户配置文件路径
-	global INI := new IniSaved(USER_CONFIG_INI_PATH)    ;用户配置
+	APP_INI.Init("AppGeneral", "UserDataPos", 1)    ;玩家信息保存位置(1:Local, 2:AppData)
+	global USER_DATA_PATH := (ini_AppGeneral_UserDataPos == 2) ? APP_DATA_PATH : A_ScriptDir
+	global USER_CONFIG_INI_NAME := APP_NAME "_config.ini"  ;用户配置文件文件名
+	global INI := new IniSaved(USER_DATA_PATH "\" USER_CONFIG_INI_NAME)    ;用户配置
 	
 	;魔兽世界相关
 	global WOW_PATH    ;魔兽路径
@@ -49,16 +46,19 @@ AddMod_Setting:
 	Gui, MainGui:Font, c010101 bold, 微软雅黑
 	Gui, MainGui:Add, GroupBox, xm+10 ym+25 w270 h77, % "本程序的配置数据文件"
 	Gui, MainGui:Font, cDefault norm, 微软雅黑 Light
-	Gui, MainGui:Add, Radio, xp+13 yp+22 h22 vini_AppGeneral_UserConfigIniPos ggSET_RDDatePos, 保存到程序所在目录
+	Gui, MainGui:Add, Radio, xp+13 yp+22 h22 vini_AppGeneral_UserDataPos ggSET_RDDatePos, 保存到程序所在目录
 	Gui, MainGui:Add, Radio, xp y+1 hp ggSET_RDDatePos Checked, 保存到AppData目录
-	Gui, MainGui:Add, Button, x+2 yp-23 Center w110 h22 ggSET_BTopen1, 打开程序所在目录
-	Gui, MainGui:Add, Button, xp y+1 Center wp hp ggSET_BTopen2, 打开AppData目录
+	Gui, MainGui:Add, Button, x+2 yp-23 Center w110 h22 vvSET_BTopenPath1 ggSET_BTopenPath, 打开程序所在目录
+	Gui, MainGui:Add, Button, xp y+1 Center wp hp vvSET_BTopenPath2 ggSET_BTopenPath, 打开AppData目录
 	
 	Gui, MainGui:Font, c010101 bold, 微软雅黑
 	Gui, MainGui:Add, GroupBox, xm+10 y+13 w270 h113, % "WoW游戏路径/版本选择(可拖拽)"
 	Gui, MainGui:Font, cDefault norm, 微软雅黑 Light
-	Gui, MainGui:Add, Edit, xp+13 yp+25 w245 h22 ReadOnly Section vini_Setting_WoWPath,
-	Gui, MainGui:Add, Button, xp y+5 w120 hp ggSET_autoGetWoWFolder, 自动识别
+	Gui, MainGui:Add, Edit, xp+13 yp+25 w223 h22 ReadOnly Section vini_Setting_WoWPath,
+	Gui, MainGui:Add, Button, x+0 yp h22 w22 vvSET_BTopenPath3 hwndhSET_BTopenPath3 ggSET_BTopenPath, ; 打开目录
+	IB_Opts_OpenFile := [[0,APP_DATA_PATH "\Img\GUI\Folder.png"], [,APP_DATA_PATH "\Img\GUI\Folderp.png"]]    ;ImageButton配色(打开文件夹)
+	ImageButton.Create(hSET_BTopenPath3, IB_Opts_OpenFile*)
+	Gui, MainGui:Add, Button, xs y+5 w120 hp ggSET_autoGetWoWFolder, 自动识别
 	Gui, MainGui:Add, Button, x+5 yp wp hp ggSET_selectWoWFolder, 手动选择
 	Gui, MainGui:Add, Text, xs y+7 w55, 版本选择:
 	Gui, MainGui:Add, Text, x+5 yp w94 vvSET_TXEditionInfo,
@@ -73,14 +73,18 @@ AddMod_Setting:
 	Gui, MainGui:Font, c010101 bold, 微软雅黑
 	Gui, MainGui:Add, GroupBox, xm+10 y+13 w270 h85, % "自定义储存路径选择(可拖拽)"
 	Gui, MainGui:Font, cDefault norm, 微软雅黑 Light
-	Gui, MainGui:Add, Edit, xp+13 yp+25 w245 h22 ReadOnly Section vini_Setting_SavedPath,
-	Gui, MainGui:Add, Button, xp y+5 wp hp ggSET_selectRealFolder, 选择路径
+	Gui, MainGui:Add, Edit, xp+13 yp+25 w223 h22 ReadOnly Section vini_Setting_SavedPath,
+	Gui, MainGui:Add, Button, x+0 yp h22 w22 vvSET_BTopenPath4 hwndhSET_BTopenPath4 ggSET_BTopenPath, ; 打开目录
+	ImageButton.Create(hSET_BTopenPath4, IB_Opts_OpenFile*)
+	Gui, MainGui:Add, Button, xs y+5 w245 hp ggSET_selectRealFolder, 选择路径
 
 	Gui, MainGui:Font, c010101 bold, 微软雅黑
 	Gui, MainGui:Add, GroupBox, xm+10 y+13 w270 h85, % "WTF备份路径选择(可拖拽)"
 	Gui, MainGui:Font, cDefault norm, 微软雅黑 Light
-	Gui, MainGui:Add, Edit, xp+13 yp+25 w245 h22 ReadOnly Section vini_Setting_BackUpPath,
-	Gui, MainGui:Add, Button, xp y+5 wp hp ggSET_selectBackUpFolder, 选择路径
+	Gui, MainGui:Add, Edit, xp+13 yp+25 w223 h22 ReadOnly Section vini_Setting_BackUpPath,
+	Gui, MainGui:Add, Button, x+0 yp h22 w22 vvSET_BTopenPath5 hwndhSET_BTopenPath5 ggSET_BTopenPath, ; 打开目录
+	ImageButton.Create(hSET_BTopenPath5, IB_Opts_OpenFile*)
+	Gui, MainGui:Add, Button, xs y+5 w245 hp ggSET_selectBackUpFolder, 选择路径
 	
 	;~ Gui, MainGui:Add, 
 return
@@ -92,7 +96,7 @@ GuiInit_Setting:
 	;MainGui控件:
 	GuiControl, Choose, ini_MainGui_MainTab, % ini_MainGui_MainTab    ;恢复上次Tab位置
 	;GroupBox<本程序的配置数据文件>:
-	GuiControl,, ini_AppGeneral_UserConfigIniPos, % 2 - ini_AppGeneral_UserConfigIniPos    ;单选框
+	GuiControl,, ini_AppGeneral_UserDataPos, % 2 - ini_AppGeneral_UserDataPos    ;单选框
 	;GroupBox<魔兽世界游戏路径><自定义存储路径><WTF备份存储路径>:
 	INI.Init("Setting", "WoWPath")    ;游戏路径
 	INI.Init("Setting", "WoWEdition")    ;游戏版本
@@ -119,21 +123,31 @@ return
 ;~ GuiTabIn_Setting:
 ;~ return
 
+
+
+;=======================================================================================================================
+;打开路径按钮 |
+;==============
+gSET_BTopenPath:
+	Gui, MainGui:Submit, NoHide
+	Switch A_GuiControl
+	{
+	Case "vSET_BTopenPath1": Run % A_ScriptDir
+	Case "vSET_BTopenPath2": Run % APP_DATA_PATH
+	Case "vSET_BTopenPath3": Run % ini_Setting_WoWPath
+	Case "vSET_BTopenPath4": Run % ini_Setting_SavedPath
+	Case "vSET_BTopenPath5": Run % ini_Setting_BackUpPath
+	}
+return
+
 ;=======================================================================================================================
 ;GroupBox<本程序的配置数据文件> |
 ;==============================
 ;选择账号保存位置：
 gSET_RDDatePos:
-	Gui, Submit, NoHide
-	USER_CONFIG_INI_PATH := (ini_AppGeneral_UserConfigIniPos == 1) ? USER_CONFIG_INI_PATH_LOCAL : USER_CONFIG_INI_PATH_APPDATA   ;改变位置
-return
-
-;打开按钮：
-gSET_BTopen1:
-	Run % A_ScriptDir
-return
-gSET_BTopen2:
-	Run % APP_DATA_PATH
+	Gui, MainGui:Submit, NoHide
+	USER_DATA_PATH := (ini_AppGeneral_UserDataPos == 2) ? APP_DATA_PATH : A_ScriptDir
+	INI.filePath := USER_DATA_PATH "\" USER_CONFIG_INI_NAME
 return
 
 ;=======================================================================================================================

@@ -16,28 +16,29 @@
 ;=============
 AddMod_WTF:
 	;模块部署
+	NEED_DEEP_SCAN_WTF := 0
 	
 	;在MainGui的TAB上:
 	;备份设置
 	Gui, MainGui:Font, c010101 bold, 微软雅黑
-	Gui, MainGui:Add, GroupBox, xm+10 ym+25 w590 h75, % "设定"
+	Gui, MainGui:Add, GroupBox, xm+10 ym+25 w590 h75, % "设置"
 	Gui, MainGui:Font, cDefault norm, 微软雅黑 Light
 
-	Gui, MainGui:Font, c010101 bold, 微软雅黑
-	Gui, MainGui:Add, Button, xp+10 yp+20 w95 h22 Disabled Section, WTF备份路径
-	Gui, MainGui:Font, cDefault norm, 微软雅黑 Light
-	Gui, MainGui:Add, Edit, x+0 yp hp w455 ReadOnly vvWTF_EDbackupPath, 
+	Gui, MainGui:Add, Checkbox, xp+10 yp+20 w130 h22 Section AltSubmit vini_WTF_ifBackUp, % "备份目标角色文件至"
+	GuiControl,, ini_WTF_ifBackUp, % INI.Init("WTF", "ifBackUp", 1)
+	Gui, MainGui:Add, Edit, x+0 yp hp w420 ReadOnly vvWTF_EDbackupPath, 
 	Gui, MainGui:Add, Button, x+0 yp h22 w22 vvWTF_BTopenPath3 hwndhWTF_BTopenPath3 ggWTF_BTopenPath, ; 打开目录
-	ImageButton.Create(hWTF_BTopenPath3, [0,APP_DATA_PATH "\Img\GUI\Folder.png"], [,APP_DATA_PATH "\Img\GUI\Folderp.png"])
+	IB_Opts_OpenFile := [[0,APP_DATA_PATH "\Img\GUI\Folder.png"], [,APP_DATA_PATH "\Img\GUI\Folderp.png"]]    ;ImageButton配色(打开文件夹)
+	ImageButton.Create(hWTF_BTopenPath3, IB_Opts_OpenFile*)
 	
-	Gui, MainGui:Add, Checkbox, xs y+5 hp AltSubmit vini_WTF_ifBackUp, % "备份目标角色文件"
-	GuiControl,, ini_WTF_ifBackUp, % INI.Init("WTF", "ifBackUp", 1)    ;初始化
+	Gui, MainGui:Add, Checkbox, xs y+5 hp AltSubmit Section vini_WTF_ifModLua, % "替换文件中的角色名"
+	GuiControl,, ini_WTF_ifModLua, % INI.Init("WTF", "ifModLua", 1)
 	
-	Gui, MainGui:Add, Checkbox, x+5 yp hp AltSubmit Section vini_WTF_ifModLua, % "替换文件中的角色名"
-	GuiControl,, ini_WTF_ifModLua, % INI.Init("WTF", "ifModLua", 1)    ;初始化
+	Gui, MainGui:Add, Checkbox, x+5 yp hp AltSubmit vini_WTF_generateLog , % "生成过程清单"
+	GuiControl,, ini_WTF_generateLog, % INI.Init("WTF", "generateLog", 1)
 	
-	Gui, MainGui:Add, Checkbox, x+5 yp hp AltSubmit vini_WTF_cLV ggWTF_CBcLV, % "彩色列表"    ;是否开启颜色
-	GuiControl,, ini_WTF_cLV, % INI.Init("WTF", "cLV", 1)    ;颜色开始初始化
+	Gui, MainGui:Add, Checkbox, x+5 yp hp AltSubmit vini_WTF_cLV ggWTF_CBcLV, % "彩色列表"
+	GuiControl,, ini_WTF_cLV, % INI.Init("WTF", "cLV", 1)
 	
 	;魔兽版本Logo
 	Gui, MainGui:Add, Picture, xm+605 ym+25 w150 h75 Section vvWTF_PICwowLogo, 
@@ -54,19 +55,17 @@ AddMod_WTF:
 	Gui, MainGui:Font, cDefault norm, 微软雅黑 Light
 	Gui, MainGui:Add, Edit, x+0 yp hp w528 ReadOnly vvWTF_EDwowPath, 
 	Gui, MainGui:Add, Button, x+0 yp h22 w22 vvWTF_BTopenPath1 hwndhWTF_BTopenPath1 ggWTF_BTopenPath, ;"打开目录"
-	ImageButton.Create(hWTF_BTopenPath1, [0,APP_DATA_PATH "\Img\GUI\Folder.png"], [,APP_DATA_PATH "\Img\GUI\Folderp.png"])
+	ImageButton.Create(hWTF_BTopenPath1, IB_Opts_OpenFile*)
 	Gui, MainGui:Font, c010101 bold, 微软雅黑
 	Gui, MainGui:Add, Button, x+0 yp w95 hp vvWTF_BTtarWowPath hwndhWTF_BTtarWowPath ggWTF_BTtarScanPath, 魔兽世界路径
 	ImageButton.Create(hWTF_BTtarWowPath, IB_Opts*)   ;彩色按钮
-	
-	
 	
 	Gui, MainGui:Add, Button, xs y+2 w95 h22 Section vvWTF_BTsrcSavedPath hwndhWTF_BTsrcSavedPath ggWTF_BTsrcScanPath, 自定义存储路径
 	ImageButton.Create(hWTF_BTsrcSavedPath, IB_Opts*)   ;彩色按钮
 	Gui, MainGui:Font, cDefault norm, 微软雅黑 Light
 	Gui, MainGui:Add, Edit, x+0 yp hp w528 ReadOnly vvWTF_EDsavedPath, 
 	Gui, MainGui:Add, Button, x+0 yp h22 w22 vvWTF_BTopenPath2 hwndhWTF_BTopenPath2 ggWTF_BTopenPath, ;"打开目录"
-	ImageButton.Create(hWTF_BTopenPath2, [0,APP_DATA_PATH "\Img\GUI\Folder.png"], [,APP_DATA_PATH "\Img\GUI\Folderp.png"])
+	ImageButton.Create(hWTF_BTopenPath2, IB_Opts_OpenFile*)
 	Gui, MainGui:Font, c010101 bold, 微软雅黑
 	Gui, MainGui:Add, Button, x+0 yp w95 hp vvWTF_BTtarSavedPath hwndhWTF_BTtarSavedPath ggWTF_BTtarScanPath, 自定义存储路径
 	ImageButton.Create(hWTF_BTtarSavedPath, IB_Opts*)   ;彩色按钮
@@ -96,16 +95,15 @@ AddMod_WTF:
 	
 	;文本框
 	Gui, MainGui:Font, c010101 bold, 微软雅黑
-	Gui, MainGui:Add, Text, xs y+5 w40 hp Center, 源角色
-	Gui, MainGui:Add, Edit, x+0 yp-2 w270 hp ReadOnly vvWTF_EDSrcSelected hwndhWTF_EDSrcSelected,
-	Gui, MainGui:Add, Edit, x+120 yp w260 hp ReadOnly vvWTF_EDTarSelected hwndhWTF_EDTarSelected,
+	Gui, MainGui:Add, Text, xs y+5 w40 hp Center Section, 源角色
+	Gui, MainGui:Add, Edit, x+0 yp-2 w270 hp  ReadOnly vvWTF_EDSrcSelected hwndhWTF_EDSrcSelected,
+	Gui, MainGui:Add, Edit, xs+430 yp w260 hp ReadOnly vvWTF_EDTarSelected hwndhWTF_EDTarSelected,
 	Gui, MainGui:Add, Text, x+0 yp+2 w50 hp Center, 目标角色
 	Gui, MainGui:Font, cDefault norm, 微软雅黑 Light
 	
-	
 
 	;左侧 LV
-	Gui, MainGui:Add, ListView, xm+10 y+1 w310 h330 Section Count500 -Multi Grid AltSubmit HwndhWTF_LVSrc ggLVSrc, ❤|职业|角色|服务器|账号|Index|WTFIndex
+	Gui, MainGui:Add, ListView, xm+10 ys+22 w310 h324 Section Count500 -Multi Grid AltSubmit vvWTF_LVSrc hwndhWTF_LVSrc ggLVWTF, ❤|职业|角色|服务器|账号|Index|WTFIndex
 	global cLVSrc := New LV_Colors(hWTF_LVSrc,,0)    ;LV上色(弊端:无法拖动排序了,需要拦截点击标题栏动作,然后重新绘色)
 	;为LV增加图片列表
 	ImageListID := IL_Create(12)  ; 创建加载 12 个小图标的图像列表.
@@ -119,13 +117,13 @@ AddMod_WTF:
 	
 	;中部
 	Gui, MainGui:Font, c010101 bold, 微软雅黑
-	Gui, MainGui:Add, Button, x+5 ys-25 w110 h22 vvWTF_BTclean ggWTF_BTclean hwndhWTF_BTclean Disabled, 全 职 业    ;恢复全部职业
+	Gui, MainGui:Add, Button, x+5 ys-23 w110 h22 vvWTF_BTclean ggWTF_BTclean hwndhWTF_BTclean Disabled, 全 职 业    ;恢复全部职业
 	ImageButton.Create(hWTF_BTclean, [0,0xE1E1E1,,"red",,,0xADADAD],[,0xE5F1FB],[,0xCCE4F7],[,0xCCCCCC,,0x838383])   ;红字的默认按钮
 	
 	;配置覆盖选项
-	Gui, MainGui:Add, GroupBox, xp y+5 w110 h245, % "复制模式"
+	Gui, MainGui:Add, GroupBox, xp y+2 w110 h202, % "覆盖模式"
 	Gui, MainGui:Font, cDefault norm, 微软雅黑 Light
-	Gui, MainGui:Add, Checkbox, xp+10 yp+20 w90 h20 AltSubmit vini_WTF_optionA1, % "账号插件配置"
+	Gui, MainGui:Add, Checkbox, xp+10 yp+17 w90 h16 AltSubmit vini_WTF_optionA1, % "账号插件配置"
 	GuiControl,, ini_WTF_optionA1, % INI.Init("WTF", "optionA1", 1)    ;初始化
 	Gui, MainGui:Add, Checkbox, xp y+0 wp hp AltSubmit vini_WTF_optionA2, % "账号系统配置"
 	GuiControl,, ini_WTF_optionA2, % INI.Init("WTF", "optionA2", 1)    ;初始化
@@ -144,18 +142,26 @@ AddMod_WTF:
 	
 	Gui, MainGui:Font, c010101 bold, 微软雅黑
 	IB_Opts2 := [[0,0xC7EDCC,,"black",,,0xBFBFBF],[,0x00FF00],[,0x00FF00,,0xFFFFFF],[,0xCCCCCC,,0x838383,,,0xBFBFBF]]    ;ImageButton配色
-	Gui, MainGui:Add, Button, xp y+5 w90 h50 vvWTF_BTcopy hwndhWTF_BTcopy ggWTF_BTCopyOrSyn Disabled, % "配置复制`n> > > >"
+	Gui, MainGui:Add, Button, xp y+3 w90 h45 vvWTF_BTcopy hwndhWTF_BTcopy ggWTF_BTCopyOrSyn Disabled, % "配置覆盖`n> > > >"
 	ImageButton.Create(hWTF_BTcopy, IB_Opts2*)   ;彩色按钮
 	
-	Gui, MainGui:Add, GroupBox, xp-10 y+15 w110 h85, % "同步模式"
-	
-	Gui, MainGui:Add, Button, xp+10 yp+23 w90 h50 vvWTF_BTsyn hwndhWTF_BTsyn ggWTF_BTCopyOrSyn Disabled, % "配置同步`n< < < <"
+	Gui, MainGui:Add, GroupBox, xp-10 y+8 w110 h74, % "同步模式"
+	Gui, MainGui:Add, Button, xp+10 yp+20 w90 h45 vvWTF_BTsyn hwndhWTF_BTsyn ggWTF_BTCopyOrSyn Disabled, % "配置同步`n< < < <"
 	ImageButton.Create(hWTF_BTsyn, IB_Opts2*)   ;彩色按钮
 	Gui, MainGui:Font, cDefault norm, 微软雅黑 Light
 	
+	Gui, MainGui:Font, c010101 bold, 微软雅黑
+	Gui, MainGui:Add, GroupBox, xp-10 y+8 w110 h48, % "自定义账号"
+	Gui, MainGui:Font, cDefault norm, 微软雅黑 Light
+	Gui, MainGui:Add, Button, xp+3 yp+16  w28 h28 vvWTF_BTcopyRaw hwndhWTF_BTcopyRaw ggWTF_BTCopyOrSyn Disabled,
+	ImageButton.Create(hWTF_BTcopyRaw, [0,APP_DATA_PATH "\Img\GUI\Arrow.png"],[,APP_DATA_PATH "\Img\GUI\Arrowp.png"],,[,APP_DATA_PATH "\Img\GUI\Arrowg.png"])
+	Gui, MainGui:Add, Edit, x+0 yp+3 w70 h22 vini_WTF_customName, % INI.Init("WTF", "customName", "根账号") 
+	
+	
+	
 	
 	;右侧 LV
-	Gui, MainGui:Add, ListView, x+15 ys w310 h330 Count500 Grid AltSubmit hwndhWTF_LVTar ggLVTar , ❤|职业|角色|服务器|账号|Index|WTFIndex
+	Gui, MainGui:Add, ListView, xs+430 ys w310 h324 Count500 Grid AltSubmit vvWTF_LVTar hwndhWTF_LVTar ggLVWTF, ❤|职业|角色|服务器|账号|Index|WTFIndex
 	global cLVTar := New LV_Colors(hWTF_LVTar,,0)    ;LV上色(弊端:无法拖动排序了,需要拦截点击标题栏动作,然后重新绘色)
 	;为LV增加图片列表
 	ImageListID := IL_Create(12)  ; 创建加载 12 个小图标的图像列表.
@@ -165,6 +171,9 @@ AddMod_WTF:
 	{
 		IL_Add(ImageListID, "HBITMAP:*" hBitMapClass%A_Index%)	
 	}
+	
+	;选取LV的详细信息列表
+	Gui, MainGui:Add, ListView, xm+10 y+2 w740 h60 Count100 Grid AltSubmit hwndhWTF_LVSel, 职业|角色|服务器|账号|WTF路径|账号链接到|角色链接到|I|J
 	
 	;左边控件封装进类
 	global SRCGui := new WTFGUIGroup(WTF                                          ;WTF类
@@ -214,9 +223,11 @@ return
 GuiTabIn_WTF:
 	if (vWTF_EDwowPath <> WOW_PATH "\" WOW_EDITION)    ;魔兽地址发生变化时,重新初始化
 	or (vWTF_EDsavedPath <> SAVED_PATH "\" WOW_EDITION)    ;自定义地址发生变化时,重新初始化
+	or (NEED_DEEP_SCAN_WTF == 1)    ;需要深度刷新列表
 	{
 		gosub, CleanItems
 		gosub, GuiInit_WTF
+		NEED_DEEP_SCAN_WTF := 0
 	}
 return
 
@@ -230,68 +241,7 @@ CleanItems:
 	GuiControl,, vWTF_EDSrcSelected,    ;左编辑框
 	GuiControl,, vWTF_EDTarSelected,    ;右编辑框
 	GuiControl, Disable, vWTF_BTcopy    ;复制按钮
-	GuiControl, Disable, vWTF_BTsyn    ;同步按钮
-return
-
-;=======================================================================================================================
-;路径切换及扫描 |
-;================
-;切换路径 左
-gWTF_BTsrcScanPath:
-	Gui MainGui:+Disabled	;主窗口禁用
-	Gui, MainGui:Submit, NoHide
-	;开关切换
-	ini_WTF_srcScanPathSwitch := SRCGui.WTFpathSwitch := 1 - SRCGui.WTFpathSwitch    
-	GuiControl, % "Enable"  SRCGui.WTFpathSwitch, vWTF_BTsrcWowPath     ;魔兽路径
-	GuiControl, % "Disable" SRCGui.WTFpathSwitch, vWTF_BTsrcSavedPath   ;自定义存储路径
-	;扫描新路径
-	gosub, srcScanNewPath
-	Gui MainGui:-Disabled	;主窗口启用
-return
-;扫描路径 左
-srcScanNewPath:
-	Gui MainGui:+Disabled	;主窗口禁用
-	SRCGui.WTFIndex := WTF.AddPath(SRCGui.WTFpathSwitch ? WTFGUIGroup.savedWTFPath : WTFGUIGroup.wowWTFPath)    ;新建WTF类,路径扫描
-	gosub, gWTF_EDsrcFilter    ;筛选动作
-	Gui MainGui:-Disabled	;主窗口启用
-return
-
-
-;切换路径 右
-gWTF_BTtarScanPath:
-	Gui MainGui:+Disabled	;主窗口禁用
-	Gui, MainGui:Submit, NoHide
-	;开关切换
-	ini_WTF_tarScanPathSwitch := TARGui.WTFpathSwitch := 1 - TARGui.WTFpathSwitch    
-	GuiControl, % "Enable"  TARGui.WTFpathSwitch, vWTF_BTtarWowPath     ;魔兽路径
-	GuiControl, % "Disable" TARGui.WTFpathSwitch, vWTF_BTtarSavedPath   ;自定义存储路径
-	;扫描新路径
-	gosub, tarScanNewPath
-	Gui MainGui:-Disabled	;主窗口启用
-return
-;扫描路径 右
-tarScanNewPath:
-	Gui MainGui:+Disabled	;主窗口禁用
-	TARGui.WTFIndex := WTF.AddPath(TARGui.WTFpathSwitch ? WTFGUIGroup.savedWTFPath : WTFGUIGroup.wowWTFPath)    ;新建WTF类,路径扫描
-	gosub, gWTF_EDtarFilter    ;筛选动作
-	Gui MainGui:-Disabled	;主窗口启用
-return
-
-
-;打开路径
-gWTF_BTopenPath:
-	Switch A_GuiControl
-	{
-	Case "vWTF_BTopenPath1":
-		GuiControlGet, path,, vWTF_EDwowPath    ;wow路径
-	Case "vWTF_BTopenPath2":
-		GuiControlGet, path,, vWTF_EDsavedPath    ;自定义存储路径
-	Case "vWTF_BTopenPath3":
-		GuiControlGet, path,, vWTF_EDbackupPath    ;WTF备份路径
-	Default:
-	}
-	if InStr(FileExist(path), "D")
-		Run % path
+	GuiControl, Disable, vWTF_BTsyn     ;同步按钮
 return
 
 ;=======================================================================================================================
@@ -315,6 +265,68 @@ ShowWoWLogo:
 return
 
 ;=======================================================================================================================
+;路径切换及扫描 |
+;================
+;切换路径 左
+gWTF_BTsrcScanPath:
+	Gui MainGui:+Disabled	;主窗口禁用
+	;开关切换
+	ini_WTF_srcScanPathSwitch := SRCGui.WTFpathSwitch := 1 - SRCGui.WTFpathSwitch    
+	GuiControl, % "Enable"  SRCGui.WTFpathSwitch, vWTF_BTsrcWowPath     ;魔兽路径
+	GuiControl, % "Disable" SRCGui.WTFpathSwitch, vWTF_BTsrcSavedPath   ;自定义存储路径
+	;扫描新路径
+	gosub, srcScanNewPath
+	Gui MainGui:-Disabled	;主窗口启用
+return
+;扫描路径 左
+srcScanNewPath:
+	Gui MainGui:+Disabled	;主窗口禁用
+	SRCGui.WTFpath := SRCGui.WTFpathSwitch ? WTFGUIGroup.savedWTFPath : WTFGUIGroup.wowWTFPath
+	SRCGui.WTFIndex := WTF.AddPath(SRCGui.WTFpath, NEED_DEEP_SCAN_WTF)    ;新建WTF类,路径扫描
+	gosub, gWTF_EDsrcFilter    ;筛选动作
+	Gui MainGui:-Disabled	;主窗口启用
+return
+
+
+;切换路径 右
+gWTF_BTtarScanPath:
+	Gui MainGui:+Disabled	;主窗口禁用
+	;开关切换
+	ini_WTF_tarScanPathSwitch := TARGui.WTFpathSwitch := 1 - TARGui.WTFpathSwitch    
+	GuiControl, % "Enable"  TARGui.WTFpathSwitch, vWTF_BTtarWowPath     ;魔兽路径
+	GuiControl, % "Disable" TARGui.WTFpathSwitch, vWTF_BTtarSavedPath   ;自定义存储路径
+	;扫描新路径
+	gosub, tarScanNewPath
+	Gui MainGui:-Disabled	;主窗口启用
+return
+;扫描路径 右
+tarScanNewPath:
+	Gui MainGui:+Disabled	;主窗口禁用
+	TARGui.WTFpath := TARGui.WTFpathSwitch ? WTFGUIGroup.savedWTFPath : WTFGUIGroup.wowWTFPath
+	TARGui.WTFIndex := WTF.AddPath(TARGui.WTFpath, NEED_DEEP_SCAN_WTF)    ;新建WTF类,路径扫描
+	gosub, gWTF_EDtarFilter    ;筛选动作
+	Gui MainGui:-Disabled	;主窗口启用
+return
+
+
+;打开路径
+gWTF_BTopenPath:
+	Switch A_GuiControl
+	{
+	Case "vWTF_BTopenPath1":
+		GuiControlGet, path,, vWTF_EDwowPath    ;wow路径
+	Case "vWTF_BTopenPath2":
+		GuiControlGet, path,, vWTF_EDsavedPath    ;自定义存储路径
+	Case "vWTF_BTopenPath3":
+		GuiControlGet, path,, vWTF_EDbackupPath    ;WTF备份路径
+	Default:
+	}
+	if InStr(FileExist(path), "D")
+		Run % path
+return
+
+
+;=======================================================================================================================
 ;筛选 |
 ;=====
 ;筛选框左
@@ -330,8 +342,6 @@ gWTF_EDtarFilter:
 	TARGui.UpdataLV()    ;LV刷新
 	Gui MainGui:-Disabled
 return
-
-
 
 ;角色筛选按钮
 gWTF_BTclass:
@@ -371,141 +381,202 @@ gWTF_CBcLV:
 	TARGui.UpdataLVColor()
 return
 
+
 ;=======================================================================================================================
 ;LV控件 |
 ;========
-;LV列表动作 左
-gLVSrc:
-	Gui MainGui:+Disabled	;主窗口禁用
-	Switch A_GuiEvent
+;LV列表动作 左 + 右
+gLVWTF:
+	Gui, ListView, % A_GuiControl
+	if (A_GuiEvent = "ColClick")    ;点击了标题栏
 	{
-	;点击了标题栏
-	Case "ColClick":
+		Gui MainGui:+Disabled
 		if (A_EventInfo == 1)
 			LV_ModifyCol(2, "SortDesc")
-		SRCGui.UpdataLVColor()
-	;项目发生了变化
-	Case "I":
-		WTF.src := SRCGui.UpdataLVSelected()[1]
-		;覆盖/同步按钮的激活控制
-		GuiControl, % "Enable" (WTF.src && WTF.tars[1]), vWTF_BTcopy ;列表同时选取了两侧的选择了文件，按钮才会显示出来
-		GuiControl, % "Enable" (WTF.src && WTF.tars[1]), vWTF_BTsyn ;列表同时选取了两侧的选择了文件，按钮才会显示出来
-	;其他情况
-	Default:
+		if (A_GuiControl == "vWTF_LVSrc")
+			SRCGui.UpdataLVColor()
+		else if (A_GuiControl == "vWTF_LVTar")
+			TARGui.UpdataLVColor()	
+		Gui MainGui:-Disabled
 	}
-	Gui MainGui:-Disabled	;主窗口启用
-return
-
-
-;LV列表动作 右
-gLVTar:
-	Gui MainGui:+Disabled	;主窗口禁用
-	Switch A_GuiEvent
+	else if ((A_GuiEvent == "F") or (A_GuiEvent == "I")) and InStr(ErrorLevel, "S")
 	{
-	;点击了标题栏
-	Case "ColClick":
-		if (A_EventInfo == 1)
-			LV_ModifyCol(2, "SortDesc")
-		TARGui.UpdataLVColor()
-	;项目发生了变化
-	Case "I":
-		WTF.tars := TARGui.UpdataLVSelected()
-		;覆盖/同步按钮的激活控制
-		GuiControl, % "Enable" (WTF.src && WTF.tars[1]), vWTF_BTcopy ;列表同时选取了两侧的选择了文件，按钮才会显示出来
-		GuiControl, % "Enable" (WTF.src && WTF.tars[1]), vWTF_BTsyn ;列表同时选取了两侧的选择了文件，按钮才会显示出来
-	;其他情况
-	Default:
+		;哨兵
+		rowIndex := 0
+		rowIndexStr := A_GuiControl
+		Loop 
+		{
+			rowIndexStr .= ";" (rowIndex := LV_GetNext(rowIndex))  ; 在前一次找到的位置后继续搜索.
+		} until !rowIndex
+		if (rowIndexStr = lastRowIndexStr)
+			return
+		lastRowIndexStr := rowIndexStr
+		;耗时的本体
+		Gui MainGui:+Disabled
+		if (A_GuiControl == "vWTF_LVSrc")
+		{
+			srcs := SRCGui.UpdataLVSelected()
+			WTF.src := srcs[1]
+			ShowInLVSel(hWTF_LVSel, srcs)
+		}
+		else if (A_GuiControl == "vWTF_LVTar")
+		{
+			WTF.tars := TARGui.UpdataLVSelected()
+			ShowInLVSel(hWTF_LVSel, WTF.tars)
+		}
+		;按钮激活控制 覆盖/同步/向左复制
+		notEmptyL := SRCGui.selectedCount ? 1 : 0
+		notEmptyR := TARGui.selectedCount ? 1 : 0
+		notSame := (TARGui.selectedCount == 1 and WTF.src.index == WTF.tars[1].index and WTF.src.WTFIndex == WTF.tars[1].WTFIndex) ? 0 : 1
+		GuiControl, % "Enable" notEmptyL * notEmptyR * notSame, vWTF_BTcopy               ;覆盖
+		GuiControl, % "Enable" notEmptyL * notEmptyR * notSame, vWTF_BTsyn                ;同步(需要管理员)
+		GuiControl, % "Enable" !notEmptyL * notEmptyR, vWTF_BTcopyRaw                     ;向左复制(左边需要留空)
+		Gui MainGui:-Disabled
 	}
-	Gui MainGui:-Disabled	;主窗口启用
 return
 
+;将items展示到LVSel中
+ShowInLVSel(hLV, items)
+{
+	Gui, ListView, % hLV    ;选择操作表
+	GuiControl, -Redraw, % hLV
+	LV_Delete()
+	for i, item in items
+	{
+		LV_Add("Icon" . item.playerClassInde
+		, item.playerClassCNShort
+		, item.Player
+		, item.Realm
+		, item.Account
+		, item.WTFPath
+		, item.accountRealPath
+		, item.playerRealPath
+		, item.index
+		, item.WTFIndex)
+	}
+	LV_ModifyCol(1, "AutoHdr")
+	LV_ModifyCol(2, "AutoHdr")
+	LV_ModifyCol(3, "AutoHdr")
+	LV_ModifyCol(4, "AutoHdr")
+	LV_ModifyCol(5, "AutoHdr")
+	LV_ModifyCol(6, "AutoHdr")
+	LV_ModifyCol(7, "AutoHdr")
+	LV_ModifyCol(8, "AutoHdr")
+	LV_ModifyCol(9, "AutoHdr")
+	GuiControl, +Redraw, % hLV
+}
 ;=======================================================================================================================
 ;复制/同步动作(核心)|
 ;====================
-
-;配置复制/同步
+;配置覆盖/同步/向左复制
 gWTF_BTCopyOrSyn:
-	;发现魔兽窗口时返回
-	if WinExist("ahk_exe Wow.exe") or WinExist("ahk_exe WowClassic.exe")
+	if WinExist("ahk_exe Wow.exe") or WinExist("ahk_exe WowClassic.exe")    ;发现魔兽窗口时返回
 	{
 		Gui, MainGui:+OwnDialogs ;各种对话框的从属
 		MsgBox, 16,, 启动失败: 请关闭魔兽窗口后重试
 		return
 	}
-	;向两者相同时错误返回
-	if (WTF.tars.Count() == 1 and WTF.src.index == WTF.tars[1].index and WTF.src.WTFIndex == WTF.tars[1].WTFIndex)
+	Switch A_GuiControl    ;模式确认
 	{
-		Gui, MainGui:+OwnDialogs ;各种对话框的从属
-		MsgBox, 16,, 错误！源角色与目标角色不能相同
+	Case "vWTF_BTcopy"   : WTF.options.cmd := "copy"
+	Case "vWTF_BTsyn"    : WTF.options.cmd := "syn"
+	Case "vWTF_BTcopyRaw": WTF.options.cmd := "copyRaw"
+	Default: return
+	}
+	Gui, MainGui:Submit, NoHide
+	if (WTF.options.cmd = "syn" and !A_IsAdmin)     ;文件名称错误
+	{
+		Gui, MainGui:+OwnDialogs    ;各种对话框的从属
+		MsgBox, 16,, % "同步模式需要管理员身份!`n请右键软件以管理员身份重新运行"
 		return
 	}
-	;职业匹配警告
-	if WTF.src.playerClassCNShort
+	if (WTF.options.cmd = "copyRaw" and RegExMatch(ini_WTF_customName, "[\\/\|<>?"":\*]"))     ;文件名称错误
 	{
-		msgStr := ""
-		for i, tar in WTF.tars
+		Gui, MainGui:+OwnDialogs    ;各种对话框的从属
+		MsgBox, 16,, % "文件名称不能包括下列任何字符:`n\/:*?""<>|"
+		return
+	}
+	OldBatchLines := A_BatchLines
+	SetBatchLines -1
+	
+	;数据刷新
+	WTF.status.index := 0                            ;进度指示
+	, WTF.status.player_realm := ""                  ;当前操作角色
+	, WTF.status.playerClassIndex := 0               ;当前操作角色职业序号
+	, WTF.status.action := ""                        ;当前动作
+	, WTF.status.cmdList := ""                       ;指令清单
+	, WTF.options.timestamp := A_Now                 ;当前时间戳
+	, WTF.options.generateLog := ini_WTF_generateLog ;是否生成日志
+	, WTF.options.logsPath := USER_DATA_PATH         ;日志保存文件夹路径
+	, WTF.options.lastLogPath := ""                  ;上次日志路径
+	, WTF.options.modifyLua := ini_WTF_ifModLua      ;修改lua
+	, WTF.options.backup := ini_WTF_ifBackUp         ;备份
+	, WTF.options.customName := ini_WTF_customName   ;自定义账号名
+	, WTF.options.customWTFPath := SRCGui.WTFpath    ;自定义账号路径(左侧选择的路径)
+	, WTF.options.SWp1 := ini_WTF_optionP1           ;账号控制
+	, WTF.options.SWp2 := ini_WTF_optionP2
+	, WTF.options.SWp3 := ini_WTF_optionP3
+	, WTF.options.SWp4 := ini_WTF_optionP4
+	, WTF.options.SWa1 := ini_WTF_optionA1           ;角色控制
+	, WTF.options.SWa2 := ini_WTF_optionA2
+	, WTF.options.SWa3 := ini_WTF_optionA3
+	, WTF.options.SWa4 := ini_WTF_optionA4
+	, WTF.UpdataStatus(WTF.status, WTF.options) ;更新计数
+	;职业匹配警告
+	if (WTF.status.pathCrashStr or WTF.status.classNotSameStr)
+	{
+		Gui, MainGui:+OwnDialogs ;各种对话框的从属
+		MsgBox, 52,, % WTF.status.pathCrashStr 
+			? "警告！下列角色的复制目标文件夹已存在,是否继续?`n`n" WTF.status.pathCrashStr 
+			: "警告！下列目标角色与源角色职业不一致,是否继续?`n`n" WTF.status.classNotSameStr
+		IfMsgBox No
 		{
-			if (tar.playerClassCNShort and tar.playerClassCNShort <> src.playerClassCNShort)    ;职业不同
-				msgStr .= tar.playerClassCNShort " " tar.Player "-" tar.Realm "(" tar.Account ")`r`n"
-		}
-		if msgStr
-		{
-			Gui, MainGui:+OwnDialogs ;各种对话框的从属
-			MsgBox, 36,, % "警告！下列目标角色与源角色职业不一致,是否继续?`n`n" msgStr
-			IfMsgBox No
-				return
+			SetBatchLines %OldBatchLines%
+			return
 		}
 	}
 	;确认信息
-	Gui, MainGui:Submit, NoHide
-	MsgBoxTxt1 := "源角色:`n" vWTF_EDSrcSelected "`n`n目标角色:`n" vWTF_EDTarSelected "`n`n是否进行<<文件复制>>来实现配置的覆盖?`n`n请对重要设置进行备份!!!"
-	MsgBoxTxt2 := "源角色:`n" vWTF_EDSrcSelected "`n`n目标角色:`n" vWTF_EDTarSelected "`n`n是否进行<<文件链接>>来实现配置的同步?`n`n请对重要设置进行备份!!!"
 	Gui, MainGui:+OwnDialogs ;各种对话框的从属
-	MsgBox, 52,, % (A_GuiControl = "vWTF_BTcopy") ? MsgBoxTxt1 : MsgBoxTxt2
+	Switch WTF.options.cmd    ;模式确认
+	{
+	Case "copy"   : MsgTxt := "源角色:`n" vWTF_EDSrcSelected "`n`n目标角色:`n" vWTF_EDTarSelected "`n`n是否进行<<文件复制>>来实现配置的覆盖?"
+	Case "syn"    : MsgTxt := "源角色:`n" vWTF_EDSrcSelected "`n`n目标角色:`n" vWTF_EDTarSelected "`n`n是否进行<<文件链接>>来实现配置的同步?"
+	Case "copyRaw": MsgTxt := "自定义账号: " WTF.options.customName 
+							. "`n`n自定义账号路径:`n" WTF.options.customWTFPath "\Account\" WTF.options.customName 
+							. "`n`n将包含角色:`n" vWTF_EDTarSelected  "`n`n是否制作自定义账号?"
+	}
+	MsgBox, 68,, % MsgTxt "`n`n请对重要设置进行备份!!!"
 	IfMsgBox Yes
 	{
-		Gui MainGui:+Disabled	;主窗口禁用
-		OldBatchLines := A_BatchLines   ;保存当前运行速度设置
-		SetBatchLines -1   ;全速运行
+		Gui MainGui:+Disabled
 		
-		;数据刷新
-		WTF.status.index := 0                        ;进度指示
-		, WTF.status.player_realm := ""              ;当前操作角色
-		, WTF.status.playerClassIndex := 0           ;当前操作角色职业序号
-		, WTF.status.action := ""                    ;当前动作
-		, WTF.status.cmdList := ""                   ;指令清单
-		, WTF.switch.modifyLua := ini_WTF_ifModLua   ;修改lua
-		, WTF.switch.backup := ini_WTF_ifBackUp      ;备份
-		, WTF.switch.SWp1 := ini_WTF_optionP1        ;账号控制
-		, WTF.switch.SWp2 := ini_WTF_optionP2
-		, WTF.switch.SWp3 := ini_WTF_optionP3
-		, WTF.switch.SWp4 := ini_WTF_optionP4
-		, WTF.switch.SWa1 := ini_WTF_optionA1        ;角色控制
-		, WTF.switch.SWa2 := ini_WTF_optionA2
-		, WTF.switch.SWa3 := ini_WTF_optionA3
-		, WTF.switch.SWa4 := ini_WTF_optionA4
-		, WTF.UpdataStatusCount()                    ;更新计数
-		, WTF.AddBackUpInfoFile(BACKUP_PATH "\" WOW_EDITION "\WTF")          ;增加备份信息文件夹\文件
 		;状态栏修改
 		SB_SetParts(200, 150)                                                ;状态栏分3部分
 		WTF.status.countForAllTarget
 		SB_SetProgress(0, 1, "show Range0-" WTF.status.countForAllTarget)    ;状态栏上增加计时条
 		SetTimer, UpdataSB, 50, 10000                                        ;状态栏更新线程开启
+		
 		;执行动作
-		if (A_GuiControl = "vWTF_BTcopy")
-		{
-			WTF.CopyPlayers()    ;复制
-		}
+		WTF.AddBackUpInfoFile(BACKUP_PATH "\" WOW_EDITION "\WTF")            ;增加备份信息文件夹\文件
+		WTF.CopyOrSynPlayers()                                               ;执行复制或同步指令
+		
+		;底层重新扫描,刷新列表
+		if (WTF.options.cmd = "copyRaw")
+			WTF.AddPath(SRCGui.WTFpath, 1)                                   ;强制刷新源items
 		else
-			gosub, DoSyn         ;同步
+			WTF.AddPath(TARGui.WTFpath, 1)                                   ;强制刷新目标items
+		gosub, gWTF_EDsrcFilter                                              ;左LV刷新
+		gosub, gWTF_EDtarFilter                                              ;右LV刷新
+		
 		;状态栏恢复,输出结论
 		SB_SetParts()
-		SB_SetText("完成")
 		SB_SetProgress(0, 1, "hide")                                         ;状态栏上计时条隐藏
-		Clipboard :=  "index:" WTF_RECORD.index "`n`n" WTF.status.cmdList
+		if FileExist(WTF.options.lastLogPath)
+			Run, % WTF.options.lastLogPath
+		MsgBox 完成
 		
-		SetBatchLines %OldBatchLines%   ;恢复速度
-		Gui MainGui:-Disabled	;主窗口启用
+		SetBatchLines %OldBatchLines%
+		Gui MainGui:-Disabled	
 	}
 return
 ;状态栏更新
@@ -517,57 +588,6 @@ UpdataSB:
 	SB_SetText(WTF.status.player_realm, 2)    ;当前角色
 	SB_SetText(WTF.status.action, 3)          ;当前动作
 return
-
-
-;同步
-DoSyn:
-	;~ for i, tar in WTF_ITEMS_TARGETS    ;多目标
-	;~ {
-		;~ ;状态栏信息变更
-		;~ WTF_RECORD.i := WTF_RECORD.countFull * (i - 1)    ;每个新角色重新校准
-		;~ classI := GetWoWClass(tar.playerClass).index
-		;~ SB_SetIcon("HBITMAP:*" hBitMapClass%classI%, 1, 2)
-		;~ SB_SetText(tar.Player "-" tar.Realm, 2)    ;状态栏2显示变更
-		;~ ;跳过完全相同的角色
-		;~ if (src.PlayerPath = tar.PlayerPath)
-		;~ {
-			;~ WTF_RECORD.SBtext3 := "与源角色重复,跳过..."
-			;~ continue
-		;~ }
-		;~ ;信息提示
-		;~ SB_SetText("正在同步到" CharacterL "-" RealmL "...",2)
-		;~ ;角色部分
-		;~ IfNotEqual, ini_Settings_BackUPMod, 1, FileCopyDir, % AccountR[i] "\" RealmR[i] "\" CharacterR[i], % NowBakPath "\" RealmR[i] "\" CharacterR[i], 1    ;备份
-		;~ FileRemoveDir, % AccountR[i] "\" RealmR[i] "\" CharacterR[i], 1    ;删除目标 账号\服务器\角色 文件夹
-		;~ FileAppend, % "mklink /j " AccountR[i] "\" RealmR[i] "\" CharacterR[i] " " AccountL "\" RealmL "\" CharacterL, ahkmklink.bat    ;账号\服务器\角色  的目录联接
-		;~ ;账号部分
-		;~ if (AccountL!=AccountR[i])    ;不在同一账号下时
-		;~ {	
-			;~ IfNotEqual, ini_Settings_BackUPMod, 1, FileCopyDir, % AccountR[i] "\SavedVariables", % NowBakPath "\SavedVariables", 1    ;备份账号插件
-			;~ IfNotEqual, ini_Settings_BackUPMod, 1, FileCopy, % AccountR[i] "\config-cache.wtf", % NowBakPath "\config-cache.wtf", 1    ;备份账号设置
-			;~ IfNotEqual, ini_Settings_BackUPMod, 1, FileCopy, % AccountR[i] "\bindings-cache.wtf", % NowBakPath "\bindings-cache.wtf", 1    ;备份账号按键
-			;~ IfNotEqual, ini_Settings_BackUPMod, 1, FileCopy, % AccountR[i] "\macros-cache.txt", % NowBakPath "\macros-cache.txt", 1    ;备份账号宏
-			;~ FileRemoveDir, % AccountR[i] "\SavedVariables", 1    ;删除目标 账号\SavedVariables 文件夹（账号插件配置）
-			;~ FileDelete, % AccountR[i] "\config-cache.wtf"    ;删除目标 账号设置
-			;~ FileDelete, % AccountR[i] "\bindings-cache.wtf"    ;删除目标 按键设置
-			;~ FileDelete, % AccountR[i] "\macros-cache.txt"    ;删除目标 宏设置
-			;~ FileAppend, % "`r`nmklink /j " AccountR[i] "\SavedVariables " AccountL "\SavedVariables", ahkmklink.bat    ;账号\SavedVariables  的目录联接
-			;~ FileAppend, % "`r`nmklink /h " AccountR[i] "\config-cache.wtf " AccountL "\config-cache.wtf", ahkmklink.bat    ;账号设置  的文件硬连接
-			;~ FileAppend, % "`r`nmklink /h " AccountR[i] "\bindings-cache.wtf " AccountL "\bindings-cache.wtf", ahkmklink.bat    ;账号按键  的文件硬连接
-			;~ FileAppend, % "`r`nmklink /h " AccountR[i] "\macros-cache.txt " AccountL "\macros-cache.txt", ahkmklink.bat    ;账号宏  的文件硬连接
-		;~ }
-		;~ ;生成联接文件（夹）
-		;~ RunWait, ahkmklink.bat,, Hide    ;运行批处理文件(隐藏)
-		;~ sleep, 1000
-		;~ FileDelete, ahkmklink.bat    ;删除该批处理文件
-		;~ ;LUA配置变更
-		;~ WoW_ChgLuaProfileKeys(AccountL "\SavedVariables", CharacterR[i] " - " RealmR[i], CharacterL " - " RealmL) ;账号配置档变更
-	;~ }
-	MsgBox 同步完成
-return
-
-
-
 
 ;=======================================================================================================================
 ;模块GUI附属 |
@@ -598,8 +618,9 @@ Class WTFGUIGroup
 		, this.hEDselected     := hEDselected
 		, this.hEDinclude      := hEDinclude
 		, this.hEDexclude      := hEDexclude
-		, this.WTFpathSwitch   := WTFpathSwitch    ;路径选取
-		, this.WTFIndex        := 0    ;当前WTF表序号
+		, this.WTFpathSwitch   := WTFpathSwitch    ;路径选取模式
+		, this.WTFpath         := WTFpath          ;当前选取WTF路径
+		, this.WTFIndex        := 0                ;当前WTF表序号
 		, this.lastWTFIndex    := 0
 		, this.lastInclude     := ""
 		, this.lastExclude     := ""
@@ -695,7 +716,7 @@ Class WTFGUIGroup
 			selected.push(this.WTF.WTFItems[WTFIndex].items[index])
 		}
 		showStr := ""
-		if (selected.Count() > 0)
+		if (this.selectedCount := selected.Count())
 		{
 			for i, item in selected
 			{
@@ -717,8 +738,8 @@ Class WTF
 	static WTFIndex := 0     ;当前WTF的index
 	static src := {}         ;源集合
 	static tars := {}        ;多目标集合
-	static switch := {}      ;WTF开关集合
 	static status := {}      ;WTF状态控制集合
+	static options := {synMod:"/d"}
 	
 	;新增WTF, 返回当前的WTFindex
 	AddPath(WTFpath, force := false)
@@ -782,57 +803,191 @@ Class WTF
 			lua := ""    ;释放
 		}
 	}
-	
-	;复制账号(不含角色)
-	CopyAccount(src, tar)
+
+	;更新选中两边文件的数量(需要先更新好控制信息switch):
+	;status.pathCrashStr := ""       ;地址碰撞记录str
+	;status.classNotSameStr := ""    ;职业不一致记录str
+	;status.countAccount
+	;status.countPlayer
+	;status.countForOneTarget
+	;status.countForAllTarget
+	UpdataStatus(status, options)
 	{
-		if (src.AccountPath <> tar.AccountPath) and not InStr(this.status.copiedAccountList, tar.AccountPath)    ;目标账号与源账号不同 且 首次复制该目录时
+		;源 地址补齐
+		this.src.accountPath := this.src.WTFpath "\Account\" this.src.Account    ;源账号完整地址
+		this.src.playerPath := this.src.accountPath "\" this.src.realm "\" this.src.player   ;源角色完整地址
+		;目标 地址补齐
+		status.pathCrashStr := ""    ;地址碰撞记录str
+		status.classNotSameStr := ""    ;职业不一致记录str
+		for i, tar in this.tars
 		{
-			this.status.copiedAccountList .= tar.AccountPath "`r`n"    ;添加进记录
+			tar.AccountPath := tar.WTFPath "\Account\" tar.Account    ;目标账号完整地址
+			tar.PlayerPath := tar.AccountPath "\" tar.Realm "\" tar.Player   ;目标角色完整地址
+			if (options.cmd = "copyRaw")    ;向左复制 检测路径是否重复
+			{
+				tar.customAccountPath := options.customWTFPath "\Account\" options.customName    ;自定义目标账号完整地址
+				tar.customPlayerPath := tar.customAccountPath "\" tar.Realm "\" tar.Player   ;自定义目标角色完整地址
+				if FileExist(tar.customPlayerPath)    ;碰撞
+					status.pathCrashStr .= tar.Player "-" tar.Realm "@" tar.Account "`n"    ;增加到碰撞列表
+			}
+			else if this.src.playerClassCNShort    ;覆盖/同步 检测职业是否一致
+			{
+				if (tar.playerClassCNShort and tar.playerClassCNShort <> this.src.playerClassCNShort)    ;职业不同
+					status.classNotSameStr .= tar.playerClassCNShort " " tar.Player "-" tar.Realm "(" tar.Account ")`r`n"
+			}
+		}
+		
+		;模拟运行一次, 计算出单次"复制"操作的文件量
+		;账号
+		status.countAccount := 0
+		if (options.cmd = "copyRaw")    ;向左复制
+		{
+			tar := this.tars[1]
+			Loop, Files, % tar.AccountPath "\*", DF    ;目标文件夹内循环
+			{
+				if (Instr(A_LoopFileAttrib, "D") and A_LoopFileName <> "SavedVariables")       ;跳过"服务器"文件夹
+					continue
+				status.countAccount += FilesCount(A_LoopFileLongPath)
+			}
+		}
+		else    ;覆盖/同步
+		{
+			Loop, Files, % this.src.AccountPath "\*", DF    ;源账号文件夹内循环
+			{
+				if (Instr(A_LoopFileAttrib, "D") and A_LoopFileName <> "SavedVariables")       ;跳过"服务器"文件夹
+					continue
+				if (options.cmd = "copy")
+				and ((options.SWa1 <> 1 and A_LoopFileName = "SavedVariables")             ;账号插件
+				or (options.SWa2 <> 1 and InStr(A_LoopFileName, "config-cache."))          ;账号系统
+				or (options.SWa3 <> 1 and InStr(A_LoopFileName, "bindings-cache."))        ;账号按键
+				or (options.SWa4 <> 1 and InStr(A_LoopFileName, "macros-cache.")))         ;账号宏
+					continue    ;跳过
+				Switch options.cmd
+				{
+				Case "copy" : status.countAccount += FilesCount(A_LoopFileLongPath) * (options.backup + 1)
+				Case "syn"  : status.countAccount += FilesCount(A_LoopFileLongPath) * options.backup + 1
+				}
+			}
+			if (options.modifyLua == 1 and (options.SWa1 == 1 or options.cmd = "syn"))    ;账号Lua修改
+				status.countAccount += FilesCount(this.src.AccountPath "\SavedVariables\*.lua")	
+		}
+		;角色
+		status.countPlayer := 0
+		status.countPlayer += (options.cmd = "copyRaw" or options.backup) ? FilesCount(this.tars[1].PlayerPath) : 0    ;备份或者向左复制
+		if (options.cmd = "syn")    ;同步
+			status.countPlayer += 1
+		else    ;覆盖
+		{
+			Loop, Files, % this.src.PlayerPath "\*", DF    ;角色文件夹内循环
+			{
+				if (options.SWp1 <> 1 and A_LoopFileName = "SavedVariables")           ;角色插件
+				or (options.SWp1 <> 1 and A_LoopFileName = "AddOns.txt")               ;角色插件 开关状态
+				or (options.SWp2 <> 1 and InStr(A_LoopFileName, "config-cache."))      ;角色系统	
+				or (options.SWp2 <> 1 and A_LoopFileName = "layout-local.txt")         ;角色系统 头像位置
+				or (options.SWp2 <> 1 and A_LoopFileName = "chat-cache.txt")           ;角色系统 聊天框
+				or (options.SWp2 <> 1 and InStr(A_LoopFileName, "CUFProfiles.txt"))    ;角色系统 团队框架
+				or (options.SWp3 <> 1 and InStr(A_LoopFileName, "bindings-cache."))    ;角色按键
+				or (options.SWp4 <> 1 and InStr(A_LoopFileName, "macros-cache."))      ;角色宏
+					continue    ;跳过
+				status.countPlayer += FilesCount(A_LoopFileLongPath)
+			}
+			if (options.modifyLua == 1 and options.SWp1 == 1)    ;角色Lua修改
+				status.countPlayer += FilesCount(this.src.PlayerPath "\SavedVariables\*.lua")
+		}
+		;单次复制总量
+		status.countForOneTarget := status.countAccount + status.countPlayer
+		;全部复制的总量
+		status.countForAllTarget := status.countForOneTarget * this.tars.Count()
+	}
+	
+	;生成备份信息文件
+	AddBackUpInfoFile(backupWTFPath)
+	{
+		if (this.options.backup == 1 and this.options.cmd <> "copyRaw")    ;开启了备份 同时 非向左复制
+		{
+			FileCreateDir, % this.options.backupPath := backupWTFPath "\Account@" this.options.timestamp    ;当前备份文件夹
+			IniWrite, % this.tars[1].WTFPath, % this.options.backupInfoIniPath := this.options.backupPath "\BackUpInfo.ini", Info, wtfPath    ;写入ini
+		}
+	}
+	
+	;复制/同步账号(不含角色)
+	CopyOrSynAccount(src, tar, options, status)
+	{
+		if not InStr(status.doneAccountList, tar.AccountPath)    ;目标账号与源账号不同 且 首次操作该目录时
+		{
+			status.doneAccountList .= tar.AccountPath "`r`n"    ;添加进记录
+			;向左复制
+			if (options.cmd = "copyRaw")    
+			{
+				Loop, Files, % tar.AccountPath "\*", DF    ;目标文件夹内循环
+				{
+					if (Instr(A_LoopFileAttrib, "D") and A_LoopFileName <> "SavedVariables")       ;跳过"服务器"文件夹
+						continue
+					this.FilesCopy(A_LoopFileLongPath, tar.customAccountPath "\" A_LoopFileName, status, "复制")    ;强力复制
+				}
+				return
+			}
+			;覆盖/同步
 			Loop, Files, % src.AccountPath "\*", DF    ;源账号文件夹内循环
 			{
 				if (Instr(A_LoopFileAttrib, "D") and A_LoopFileName <> "SavedVariables")       ;跳过"服务器"文件夹
-				or (this.switch.SWa1 <> 1 and A_LoopFileName = "SavedVariables")               ;账号插件
-				or (this.switch.SWa2 <> 1 and InStr(A_LoopFileName, "config-cache."))          ;账号系统
-				or (this.switch.SWa3 <> 1 and InStr(A_LoopFileName, "bindings-cache."))        ;账号按键
-				or (this.switch.SWa4 <> 1 and InStr(A_LoopFileName, "macros-cache."))          ;账号宏
+					continue
+				if (options.cmd = "copy")
+				and ((options.SWa1 <> 1 and A_LoopFileName = "SavedVariables")             ;账号插件
+				or (options.SWa2 <> 1 and InStr(A_LoopFileName, "config-cache."))          ;账号系统
+				or (options.SWa3 <> 1 and InStr(A_LoopFileName, "bindings-cache."))        ;账号按键
+				or (options.SWa4 <> 1 and InStr(A_LoopFileName, "macros-cache.")))         ;账号宏
 					continue    ;跳过
-				if (this.switch.backup == 1)    ;备份
-					this.FilesCopy(tar.AccountPath "\" A_LoopFileName, this.status.backupPath "\" tar.Account "\" A_LoopFileName, this.status, "备份")    ;强力复制
-				this.FilesCopy(A_LoopFileLongPath, tar.AccountPath "\" A_LoopFileName, this.status, "复制")    ;强力复制
+				if (options.backup == 1)    ;备份
+				{
+					this.FilesCopy(tar.AccountPath "\" A_LoopFileName, options.backupPath "\" tar.Account "\" A_LoopFileName, status, "备份")    ;强力复制
+					IniWrite, 1, % options.backupInfoIniPath, Account, % tar.Account    ;写入ini 
+				}
+				Switch options.cmd
+				{
+				Case "copy": this.FilesCopy(A_LoopFileLongPath, tar.AccountPath "\" A_LoopFileName, status, "复制")    ;强力复制
+				Case "syn" : this.Mklink(tar.AccountPath "\" A_LoopFileName, A_LoopFileLongPath, status, "软连接", options.synMod)    ;链接目录
+				}
 			}
 		}
-		if (this.switch.modifyLua == 1 and this.switch.SWa1 == 1)    ;账号Lua修改
-			ChangeLuaProfileKeys(tar.AccountPath "\SavedVariables\*.lua", [src.Player, src.Realm, tar.Player, tar.Realm], this.status)    ;文件修改
+		if (options.cmd <> "copyRaw" and options.modifyLua == 1 and (options.SWa1 == 1 or options.cmd = "syn"))    ;账号Lua修改
+			ChangeLuaProfileKeys(tar.AccountPath "\SavedVariables\*.lua", [src.Player, src.Realm, tar.Player, tar.Realm], status)    ;文件修改
 	}
 	
-	;复制角色
-	CopyPlayer(src, tar)
+	;复制/同步角色
+	CopyOrSynPlayer(src, tar, options, status)
 	{
-		if (this.switch.backup == 1)    ;备份
-			this.FilesCopy(tar.PlayerPath, this.status.backupPath "\" tar.Account "\" tar.Realm "\" tar.Player, this.status, "备份")    ;强力复制
+		if (options.cmd = "copyRaw")    ;向左复制 直接返回
+			return this.FilesCopy(tar.PlayerPath, tar.customPlayerPath, status, "复制")    ;强力复制
+		if (options.backup == 1)    ;备份
+		{
+			this.FilesCopy(tar.PlayerPath, options.backupPath "\" tar.Account "\" tar.Realm "\" tar.Player, status, "备份")    ;强力复制
+			IniWrite, 1, % options.backupInfoIniPath, Player, % tar.Player "-" tar.Realm "@" tar.Account    ;写入ini 
+		}
+		if (options.cmd = "syn")    ;同步
+			return this.Mklink(tar.PlayerPath, src.PlayerPath, status, "软连接", options.synMod)    ;链接目录
 		Loop, Files, % src.PlayerPath "\*", DF    ;角色文件夹内循环
 		{
-			if (this.switch.SWp1 <> 1 and A_LoopFileName = "SavedVariables")           ;角色插件
-			or (this.switch.SWp1 <> 1 and A_LoopFileName = "AddOns.txt")               ;角色插件 开关状态
-			or (this.switch.SWp2 <> 1 and InStr(A_LoopFileName, "config-cache."))      ;角色系统	
-			or (this.switch.SWp2 <> 1 and A_LoopFileName = "layout-local.txt")         ;角色系统 头像位置
-			or (this.switch.SWp2 <> 1 and A_LoopFileName = "chat-cache.txt")           ;角色系统 聊天框
-			or (this.switch.SWp2 <> 1 and InStr(A_LoopFileName, "CUFProfiles.txt"))    ;角色系统 团队框架
-			or (this.switch.SWp3 <> 1 and InStr(A_LoopFileName, "bindings-cache."))    ;角色按键
-			or (this.switch.SWp4 <> 1 and InStr(A_LoopFileName, "macros-cache."))      ;角色宏
+			if (options.SWp1 <> 1 and A_LoopFileName = "SavedVariables")           ;角色插件
+			or (options.SWp1 <> 1 and A_LoopFileName = "AddOns.txt")               ;角色插件 开关状态
+			or (options.SWp2 <> 1 and InStr(A_LoopFileName, "config-cache."))      ;角色系统	
+			or (options.SWp2 <> 1 and A_LoopFileName = "layout-local.txt")         ;角色系统 头像位置
+			or (options.SWp2 <> 1 and A_LoopFileName = "chat-cache.txt")           ;角色系统 聊天框
+			or (options.SWp2 <> 1 and InStr(A_LoopFileName, "CUFProfiles.txt"))    ;角色系统 团队框架
+			or (options.SWp3 <> 1 and InStr(A_LoopFileName, "bindings-cache."))    ;角色按键
+			or (options.SWp4 <> 1 and InStr(A_LoopFileName, "macros-cache."))      ;角色宏
 				continue    ;跳过
-			this.FilesCopy(A_LoopFileLongPath, tar.PlayerPath "\" A_LoopFileName, this.status, "复制")    ;强力复制
+			this.FilesCopy(A_LoopFileLongPath, tar.PlayerPath "\" A_LoopFileName, status, "复制")    ;强力复制
 		}
-		if (this.switch.modifyLua == 1 and this.switch.SWp1 == 1)    ;角色Lua修改
-			ChangeLuaPlayerName(tar.PlayerPath "\SavedVariables\*.lua", [src.Player, src.Realm, tar.Player, tar.Realm], this.status)    ;修改Lua
+		if (options.modifyLua == 1 and options.SWp1 == 1)    ;角色Lua修改
+			ChangeLuaPlayerName(tar.PlayerPath "\SavedVariables\*.lua", [src.Player, src.Realm, tar.Player, tar.Realm], status)    ;修改Lua
 	}
 	
-	;批量复制角色
-	CopyPlayers()
+	;批量复制/同步角色
+	CopyOrSynPlayers()
 	{
 		src := WTF.src
-		this.status.copiedAccountList := ""    ;账号列表清空
+		this.status.doneAccountList := ""    ;账号列表清空
 		for i, tar in WTF.tars
 		{
 			this.status.index := this.status.countForOneTarget * (i - 1)    ;进度重新校准
@@ -843,79 +998,24 @@ Class WTF
 				this.status.action := "与源角色重复,跳过..."
 				continue
 			}
-			this.CopyAccount(src, tar)    ;复制账号
-			this.CopyPlayer(src, tar)     ;复制角色
+			this.CopyOrSynAccount(src, tar, this.options, this.status)    ;复制/同步账号
+			this.CopyOrSynPlayer(src, tar, this.options, this.status)     ;复制/同步角色
+			;检查目标账号,角色状态
 		}
+		if this.options.generateLog    ;生成日志
+			this.options.lastLogPath := this.GenerateLogFile("index:" this.status.index "`r`n" this.status.cmdList)
+		else
+			this.options.lastLogPath := ""
 	}
 	
-	;生成备份信息文件
-	AddBackUpInfoFile(backupWTFPath)
+	;生成操作日志文件
+	GenerateLogFile(txt := "")
 	{
-		if (this.switch.backup == 1)    ;开启了备份
-		{
-			FileCreateDir, % this.status.backupPath := backupWTFPath "\Account@" A_Now    ;当前备份文件夹
-			FileAppend, % this.tars[1].WTFPath, % this.status.backupPath "\BackUpInfo.txt", UTF-8    ;保存目标所在WTF位置
-		}
+		FileCreateDir, % this.options.logsPath "\Logs"
+		FileAppend, % txt, % this.options.lastLogPath := this.options.logsPath "\Logs\" this.options.timestamp ".log", UTF-8
+		return this.options.lastLogPath
 	}
-	
-	;更新选中两边文件的数量(需要先更新好控制信息switch):
-	;this.status.countAccount
-	;this.status.countPlayer
-	;this.status.countForOneTarget
-	;this.status.countForAllTarget
-	UpdataStatusCount()
-	{
-		;源 地址补齐
-		this.src.accountPath := this.src.WTFpath "\Account\" this.src.Account    ;源账号完整地址
-		this.src.playerPath := this.src.accountPath "\" this.src.realm "\" this.src.player   ;源角色完整地址
-		;目标 地址补齐
-		for i, tar in this.tars
-		{
-			tar.AccountPath := tar.WTFPath "\Account\" tar.Account    ;目标账号完整地址
-			tar.PlayerPath := tar.AccountPath "\" tar.Realm "\" tar.Player   ;目标角色完整地址
-		}
-		
-		;模拟运行一次, 计算出单次"复制"操作的文件量
-		;账号
-		this.status.countAccount := 0
-		Loop, Files, % this.src.AccountPath "\*", DF    ;源账号文件夹内循环
-		{
-			if (Instr(A_LoopFileAttrib, "D") and A_LoopFileName <> "SavedVariables")       ;跳过"服务器"文件夹
-			or (this.switch.SWa1 <> 1 and A_LoopFileName = "SavedVariables")               ;账号插件
-			or (this.switch.SWa2 <> 1 and InStr(A_LoopFileName, "config-cache."))          ;账号系统
-			or (this.switch.SWa3 <> 1 and InStr(A_LoopFileName, "bindings-cache."))        ;账号按键
-			or (this.switch.SWa4 <> 1 and InStr(A_LoopFileName, "macros-cache."))          ;账号宏
-				continue    ;跳过
-			this.status.countAccount += ((A_LoopFileName = "SavedVariables") ? FilesCount(A_LoopFileLongPath "\*") : 1) * (1 + this.switch.backup)
-		}
-		if (this.switch.modifyLua == 1 and this.switch.SWa1 == 1)    ;账号Lua修改
-			this.status.countAccount += FilesCount(this.src.AccountPath "\SavedVariables\*.lua")	
-		;角色
-		this.status.countPlayer := 0
-		if (this.switch.backup == 1)    ;备份
-			this.status.countPlayer += FilesCount(this.src.PlayerPath "\*")
-		Loop, Files, % src.PlayerPath "\*", DF    ;角色文件夹内循环
-		{
-			if (this.switch.SWp1 <> 1 and A_LoopFileName = "SavedVariables")           ;角色插件
-			or (this.switch.SWp1 <> 1 and A_LoopFileName = "AddOns.txt")               ;角色插件 开关状态
-			or (this.switch.SWp2 <> 1 and InStr(A_LoopFileName, "config-cache."))      ;角色系统	
-			or (this.switch.SWp2 <> 1 and A_LoopFileName = "layout-local.txt")         ;角色系统 头像位置
-			or (this.switch.SWp2 <> 1 and A_LoopFileName = "chat-cache.txt")           ;角色系统 聊天框
-			or (this.switch.SWp2 <> 1 and InStr(A_LoopFileName, "CUFProfiles.txt"))    ;角色系统 团队框架
-			or (this.switch.SWp3 <> 1 and InStr(A_LoopFileName, "bindings-cache."))    ;角色按键
-			or (this.switch.SWp4 <> 1 and InStr(A_LoopFileName, "macros-cache."))      ;角色宏
-				continue    ;跳过
-			this.status.countPlayer += (A_LoopFileName = "SavedVariables") ? FilesCount(A_LoopFileLongPath "\*") : 1
-		}
-		if (this.switch.modifyLua == 1 and this.switch.SWp1 == 1)    ;角色Lua修改
-			this.status.countPlayer += FilesCount(this.src.PlayerPath "\SavedVariables\*.lua")
-		;单次复制总量
-		this.status.countForOneTarget := this.status.countAccount + this.status.countPlayer
-		;全部复制的总量
-		this.status.countForAllTarget := this.status.countForOneTarget * this.tars.Count()
-	}
-	
-	
+
 	;文件(文件夹)复制, 带有状态变更
 	FilesCopy(srcPath, tarPath, status, str := "复制", overWrite := "overWrite")
 	{
@@ -923,13 +1023,26 @@ Class WTF
 		status.cmdList .= "[" str "]文件复制`t源地址:" srcPath "`t目标地址:" tarPath "`r`n"
 		status.index += FolderCopyEx(srcPath, tarPath, overWrite)    ;强力复制文件
 	}
+	
+	;文件(文件夹)链接, 带有状态变更
+	Mklink(linkPath, realPath, status, str := "软链接", mod := "/d")
+	{
+		status.action := str ":" linkPath
+		if FilesDeleteEx(linkPath, true)   ;操作前先删除源目录
+			status.cmdList .= "[删除]文件删除`t地址:" linkPath "`r`n"
+		if RunMklink(mod, linkPath, realPath, true)    ;目录联接,成功返回1
+		{
+			status.cmdList .= "[" str "]mklink " mod "`t链接地址:" linkPath "`t真实地址:" realPath "`r`n"
+			return 1
+		}
+	}
 }
 
 ;获取文件数量(默认遍历所有子文件)
 FilesCount(path, mod := "FR")
 {
 	count := 0
-	Loop, Files, % path, % mod
+	Loop, Files, % InStr(FileExist(path), "D") ? (path "\*") : path, % mod
 		count++
 	return count
 }
@@ -1012,7 +1125,7 @@ ChangeLuaPlayerName(filePaths, o, status := "")
 		{
 			lua.WriteToFile()
 			try status.action := "修改文件:" A_LoopFileLongPath    ;记录更新
-			try status.cmdList := "[修改]文件修改`t地址:" A_LoopFileLongPath "`r`n"    ;记录更新
+			try status.cmdList .= "[修改]文件修改`t地址:" A_LoopFileLongPath "`r`n"    ;记录更新
 		}
 		lua := ""    ;释放内存
     }
@@ -1051,7 +1164,7 @@ ChangeLuaProfileKeys(filePaths, o, status := "")
 			lua.text := SubStr(lua.text, 1, pos1 - 1) . newMidText . SubStr(lua.text, pos2 + 4)    ;重新拼合
 			lua.WriteToFile()
 			try status.action := "修改文件:" A_LoopFileLongPath    ;记录更新
-			try status.cmdList := "[修改]文件修改`t地址:" A_LoopFileLongPath "`r`n"    ;记录更新
+			try status.cmdList .= "[修改]文件修改`t地址:" A_LoopFileLongPath "`r`n"    ;记录更新
 		}
 		lua := midText := newMidText := ""    ;释放内存
     }
