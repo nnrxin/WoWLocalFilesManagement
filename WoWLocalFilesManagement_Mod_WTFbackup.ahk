@@ -27,7 +27,7 @@ AddMod_WTFbackup:
 	Gui, MainGui:Add, Button, x+5 yp hp vvWTFBak_BTdelete30 Disabled, 删除一个月之前的
 	Gui, MainGui:Add, Button, x+5 yp hp vvWTFBak_BTdelete365 Disabled, 删除一年之前的
 	Gui, MainGui:Add, Button, x+5 yp hp vvWTFBak_BTdelete0 Disabled, 删除全部
-	Gui, MainGui:Add, ListView, xm+10 y+15 w740 h505 Section Count100 Grid AltSubmit vvWTFBak_LV hwndhWTFBak_LV ggWTFBak_LV, 空|dataIndex|序号|备份时间|文件大小|来源地
+	Gui, MainGui:Add, ListView, xm+10 y+15 w740 h505 Section -Multi Count100 Grid AltSubmit vvWTFBak_LV hwndhWTFBak_LV ggWTFBak_LV, 空|dataIndex|序号|备份时间|文件大小|来源地
 	
 	global WTFBak := new WTFBakDataStorage()
 	global BakGui := new WTFBakGUIListView(WTFBak, hWTFBak_LV)
@@ -126,7 +126,7 @@ gWTFBak_BTdelete:
 	MsgBox, 52,, % "确定删除?`n`n序号: " sel.index "`n备份时间: " sel.time "`n角色: "  "`n账号: "  "`n`n删除路径:`n" sel.nowPath
 	IfMsgBox Yes
 	{
-		FilesDeleteEx(sel.nowPath, 1)
+		WTFBak.DeleteBackup([sel])
 		gosub, scanBackupPath
 		sel := {}
 		GuiControl, Disable, vWTFBak_BTrestore
@@ -202,11 +202,19 @@ Class WTFBakDataStorage extends FileDataStorage
 	}
 	
 	;还原
-	RestoreBackup()
+	RestoreBackup(item)
 	{
-		sel := this.sels[1]
-		FolderCopyEx(sel.nowPath, sel.fromPath, "overWrite", true)    ;覆盖写入(先移除其中的链接目录)
-		FilesDeleteEx(sel.fromPath "\BackUpInfo.ini")    ;删除复制过去的ini 
+		FolderCopyEx(item.nowPath, item.fromPath, "overWrite", true)    ;覆盖写入(先移除其中的链接目录)
+		FilesDeleteEx(item.fromPath "\BackUpInfo.ini")    ;删除复制过去的ini 
+	}
+	
+	;删除
+	DeleteBackup(items)
+	{
+		for i, item in items
+		{
+			FilesDeleteEx(item.nowPath, 1)
+		}
 	}
 }
 

@@ -60,15 +60,14 @@ AddMod_AddOns:
 	Gui, MainGui:Add, Button, xp y+4 wp hp vvAO_BTlink ggAO_BTcopyOrSyn Disabled, % "链接`n> > > >"
 
 
-	Gui, MainGui:Add, ListView, xm+10 ym+80 w310 h450 Section Count500 Grid AltSubmit vvAO_LVwow hwndhAO_LVwow ggAO_LV, |dataIndex|序号|名称|大小|最后修改时间
+	Gui, MainGui:Add, ListView, xm+10 ym+80 w310 h450 Section Count500 Grid AltSubmit vvAO_LVwow hwndhAO_LVwow ggAO_LV, 序号|dataIndex|名称|大小|最后修改时间
 	;为LV增加图片列表
 	
-	Gui, MainGui:Add, ListView, x+120 yp wp hp Section Count500 Grid AltSubmit vvAO_LVsaved hwndhAO_LVsaved ggAO_LV, |dataIndex|序号|名称|大小|最后修改时间
+	Gui, MainGui:Add, ListView, x+120 yp wp hp Section Count500 Grid AltSubmit vvAO_LVsaved hwndhAO_LVsaved ggAO_LV, 序号|dataIndex|名称|大小|最后修改时间
 	;为LV增加图片列表
 	
 	;选取LV的详细信息列表
 	Gui, MainGui:Add, ListView, xm+10 y+2 w740 h80 Count100 Grid hwndhAO_LVSel, 序号|名称|大小|最后修改时间|真实地址|J
-	
 	
 	global AddOns := new AddOnsDataStorage()
 	;左边控件封装进类
@@ -257,8 +256,8 @@ gAO_BTcopyOrSyn:
 		MsgBox, 16,, % "目录联接需要管理员身份!`n请右键软件以管理员身份重新运行"
 		return
 	}
-	AddOns.tarRealPath := AddOns.GetFolderMklinkInfo(AddOns.tarPath).realPath    ;获取目标真实路径
-	AddOns.srcRealPath := AddOns.GetFolderMklinkInfo(AddOns.srcPath).realPath    ;获取来源真实路径
+	AddOns.tarRealPath := AddOns.GetMklinkInfo(AddOns.tarPath).realPath    ;获取目标真实路径
+	AddOns.srcRealPath := AddOns.GetMklinkInfo(AddOns.srcPath).realPath    ;获取来源真实路径
 	;两边真实目录相同时
 	if (AddOns.srcRealPath = AddOns.tarRealPath)    ;两边目录相同时返回(可通过按钮控制避免)
 	{
@@ -279,7 +278,7 @@ gAO_BTcopyOrSyn:
 	, AddOns.options.lastLogPath := ""                   ;上次日志路径
 	, AddOns.UpdateStatus(AddOns.status, AddOns.options) ;更新计数
 	;目标目录已存在警告
-	if (AddOns.status.pathCrashStr)
+	if (AddOns.status.pathCrashStr and AddOns.options.cmd <> "synAll")
 	{
 		Gui, MainGui:+OwnDialogs ;各种对话框的从属
 		MsgBox, 52,, % "警告！在目标文件夹" AddOns.tarPath "中下列插件已存在,继续将会时该文件夹内下列插件被完全覆盖!`n`n" AddOns.status.pathCrashStr "`n`n是否继续?"
@@ -294,7 +293,7 @@ gAO_BTcopyOrSyn:
 	{
 	Case "copy"   : MsgTxt := "将复制" AddOns.srcPath "中的插件" AddOns.status.SelectedStr "到" AddOns.tarPath "`n`n是否继续?"
 	Case "syn"    : MsgTxt := "将执行软链接 mklink /d`n`n链接地址:" AddOns.tarPath "中的插件" AddOns.status.SelectedStr "`n`n真实地址:" AddOns.srcPath "中的对应插件`n`n是否继续?"
-	Case "synAll" : MsgTxt := "将执行软链接 mklink /d`n`n链接地址:" AddOns.tarPath "`n`n真实地址:" AddOns.srcPath "`n`n是否继续?"
+	Case "synAll" : MsgTxt := "将执行软链接 mklink /d`n`n链接地址:" AddOns.tarPath "`n`n真实地址:" AddOns.srcPath "`n`n该动作将会删除链接地址目录及其下所有文件,是否继续?"
 	}
 	Gui, MainGui:+OwnDialogs ;各种对话框的从属
 	MsgBox, 68,, % MsgTxt "`n`n操作前最好对重要文件手动备份,以免数据丢失!!!"
@@ -313,12 +312,12 @@ gAO_BTcopyOrSyn:
 		;底层重新扫描,刷新列表
 		if selL
 		{
-			savedAOGui.dataIndex := AddOns.AddPath(AddOnsGUIListView.savedAddOnsPath, 1)   ;重新扫描自定义插件目录
+			savedAOGui.dataIndex := AddOns.AddData(AddOnsGUIListView.savedAddOnsPath, 1)   ;重新扫描自定义插件目录
 			savedAOGui.UpdateLV(1)
 		}
 		else
 		{
-			wowAOGui.dataIndex := AddOns.AddPath(AddOnsGUIListView.wowAddOnsPath, 1)       ;重新扫描wow插件目录
+			wowAOGui.dataIndex := AddOns.AddData(AddOnsGUIListView.wowAddOnsPath, 1)       ;重新扫描wow插件目录
 			wowAOGui.UpdateLV(1)
 		}
 		
@@ -360,28 +359,26 @@ Class AddOnsGUIListView extends GUIListView
 			if (this.include <> "" and !InStr(name, this.include))    ;筛选文字
 				continue
 			LV_Add(
-			, 
+			, item.index                ;序号 
 			, item.dataIndex            ;AddOns序号
-			, item.index                ;序号
 			, name                      ;名称
 			, item.fileSize             ;魔兽中大小
 			, item.timeModified)        ;魔兽中修改时间
 		}
-		LV_ModifyCol(1, 0)
+		LV_ModifyCol(1, "AutoHdr Logical")
 		LV_ModifyCol(2, 0)
 		LV_ModifyCol(3, "AutoHdr Logical")
-		LV_ModifyCol(4, "AutoHdr Logical")
-		LV_ModifyCol(5, "AutoHdr Logical Right")
-		LV_ModifyCol(6, "AutoHdr Logical")
+		LV_ModifyCol(4, "AutoHdr Logical Right")
+		LV_ModifyCol(5, "AutoHdr Logical")
 	}
 	
 	;颜色规则,需要自设
 	cLVRule(item, rowIndex, items)    
 	{
 		if items.isReparse
-			this.cLV.Cell(rowIndex, 4, 0x9C9C9C)
+			this.cLV.Cell(rowIndex, 3, 0x9C9C9C)
 		else if item.isReparse    ;是否为链接
-			this.cLV.Cell(rowIndex, 4, 0xCFCFCF)
+			this.cLV.Cell(rowIndex, 3, 0xCFCFCF)
 	}
 }
 
@@ -426,11 +423,11 @@ Class AddOnsDataStorage extends FileDataStorage
 	{
 		status.SelectedStr := ""    ;选中目标的str拼合
 		status.pathCrashStr := ""    ;目标已存在记录str
-		for name, src in this.Selected
+		for i, src in this.Selected
 		{
-			status.SelectedStr .= name "; "
-			if (FileExist(this.tarPath "\" name))
-				status.pathCrashStr .= name "; "    ;增加目标已存在记录
+			status.SelectedStr .= src.name "; "
+			if (FileExist(this.tarPath "\" src.name))
+				status.pathCrashStr .= src.name "; "    ;增加目标已存在记录
 		}
 		;模拟运行一次, 计算出操作的文件量
 		status.countAll := 0
@@ -440,7 +437,7 @@ Class AddOnsDataStorage extends FileDataStorage
 		}
 		else    ;复制/链接子文件夹
 		{
-			for name, src in this.Selected
+			for i, src in this.Selected
 			{
 				if (options.cmd = "copy")    ;复制
 					status.countAll += FilesCountEx(src.AddOnPath)
@@ -460,11 +457,11 @@ Class AddOnsDataStorage extends FileDataStorage
 			this.Mklink(this.tarPath, this.srcPath, this.status)
 		else
 		{
-			for name, src in this.Selected
+			for i, src in this.Selected
 			{
-				this.status.AddOnName := name
-				tarPath := this.tarPath "\" name
-				if (src.AddOnRealPath = this.GetFolderMklinkInfo(tarPath).realPath)
+				this.status.AddOnName := src.name
+				tarPath := this.tarPath "\" src.name
+				if (src.AddOnRealPath = this.GetMklinkInfo(tarPath).realPath)
 					continue
 				if (this.options.cmd = "copy")
 					this.FilesCopy(src.AddOnPath, tarPath, this.status, "复制", "exactal")    ;复制单个子文件夹

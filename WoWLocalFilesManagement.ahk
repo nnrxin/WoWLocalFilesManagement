@@ -8,6 +8,7 @@
 
 ;运行参数
 #NoEnv
+#NoTrayIcon
 #SingleInstance ignore    ;不能双开
 #MaxHotkeysPerInterval 99000000
 #HotkeyInterval 99000000
@@ -61,6 +62,7 @@ GuiAddTabMod("MainGui", "ini_MainGui_MainTab", MODS, "基本设置", "Setting")
 GuiAddTabMod("MainGui", "ini_MainGui_MainTab", MODS, "WTF", "WTF")
 GuiAddTabMod("MainGui", "ini_MainGui_MainTab", MODS, "WTF备份管理", "WTFbackup")
 GuiAddTabMod("MainGui", "ini_MainGui_MainTab", MODS, "插件管理", "AddOns")
+GuiAddTabMod("MainGui", "ini_MainGui_MainTab", MODS, "关于", "About")
 
 Gui, MainGui:Font, italic    ;斜体
 Gui, MainGui:Add, StatusBar, hwndhStatusBar
@@ -159,6 +161,7 @@ GuiAddTabMod(G, tab, ByRef mods, tabName, modName)
 #Include WoWLocalFilesManagement_Mod_WTF.ahk
 #Include WoWLocalFilesManagement_Mod_WTFbackup.ahk
 #Include WoWLocalFilesManagement_Mod_AddOns.ahk
+#Include WoWLocalFilesManagement_Mod_About.ahk
 
 
 

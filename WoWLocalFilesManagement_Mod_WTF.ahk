@@ -641,7 +641,7 @@ Class WTFGUIListView extends GUIListView
 		;链接染色
 		if item.playerIsReparse
 			this.cLV.Cell(rowIndex, 7, 0x9C9C9C)
-		else if item.accountRealPath
+		else if item.accountIsReparse
 			this.cLV.Cell(rowIndex, 7, 0xCFCFCF)
 		else
 			this.cLV.Cell(rowIndex, 7, 0xE8E8E8)
@@ -683,7 +683,9 @@ Class WTFDataStorage extends FileDataStorage
 		Loop, Files, % dataPath "\*", D    ;在文件夹WTF\Account内循环
 		{
 			account := A_LoopFileName    ;账号文件夹名称
-			accountRealPath := this.GetMklinkInfo(A_LoopFileLongPath "\SavedVariables").realPath    ;账号真实地址
+			accountMklinkInfo := this.GetMklinkInfo(A_LoopFileLongPath "\SavedVariables")
+			accountRealPath := accountMklinkInfo.realPath    ;账号真实地址
+			accountIsReparse := accountMklinkInfo.IsReparse    ;账号是链接
 			lua := new WowAddOnSavedLua(A_LoopFileLongPath "\SavedVariables\PlayerInfo.lua", "Obj")    ;加载职业信息lua
 			Loop, Files, % A_LoopFileLongPath "\*", D    ;某账号内循环
 			{
@@ -702,6 +704,7 @@ Class WTFDataStorage extends FileDataStorage
 									    , playerClass      : lua.Get([player "-" realm, "class"]).Value              ;职业
 									    , WTFpath          : dataPath                                                ;wtf路径
 									    , accountRealPath  : accountRealPath                                         ;账号真实路径
+										, accountIsReparse : accountIsReparse                                        ;账号时链接
 									    , playerRealPath   : mklinkInfo.realPath                                     ;角色真实路径
 										, playerIsReparse  : mklinkInfo.isReparse                                    ;角色是链接
 									    , WTFIndex         : this.dataIndex}                                         ;所在WTF编号(隐藏属性)
