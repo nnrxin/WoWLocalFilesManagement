@@ -100,10 +100,10 @@ GuiInit_Setting:
 	;GroupBox<魔兽世界游戏路径><自定义存储路径><WTF备份存储路径>:
 	INI.Init("Setting", "WoWPath")    ;游戏路径
 	INI.Init("Setting", "WoWEdition")    ;游戏版本
-	INI.Init("Setting", "SavedPath", A_ScriptDir "\WOW_Saved")    ;真实存储位置
-	INI.Init("Setting", "BackUpPath", A_ScriptDir "\WOW_WTFBackUp")    ;WTF备份存储路径,默认本地
-	SAVED_PATH := FileExist(ini_Setting_SavedPath) ? ini_Setting_SavedPath : A_ScriptDir "\WOW_Saved"    ;真实存储位置的验证
-	BACKUP_PATH := FileExist(ini_Setting_BackUpPath) ? ini_Setting_BackUpPath : A_ScriptDir "\WOW_WTFBackUp"    ;WTF备份路径的验证
+	INI.Init("Setting", "SavedPath", A_ScriptDir "\WoW Saved")    ;真实存储位置
+	INI.Init("Setting", "BackUpPath", A_ScriptDir "\WoW WTFBackUp")    ;WTF备份存储路径,默认本地
+	SAVED_PATH := FileExist(ini_Setting_SavedPath) ? ini_Setting_SavedPath : A_ScriptDir "\WoW Saved"    ;真实存储位置的验证
+	BACKUP_PATH := FileExist(ini_Setting_BackUpPath) ? ini_Setting_BackUpPath : A_ScriptDir "\WoW WTFBackUp"    ;WTF备份路径的验证
 	if FileExist(ini_Setting_WoWPath "\" ini_Setting_WoWEdition "\WTF")    ;初始化时验证到魔兽地址正确
 	{
 		GuiControl,, ini_Setting_WoWPath, % WOW_PATH := ini_Setting_WoWPath    ;游戏路径
@@ -129,15 +129,17 @@ return
 ;打开路径按钮 |
 ;==============
 gSET_BTopenPath:
-	Gui, MainGui:Submit, NoHide
 	Switch A_GuiControl
 	{
-	Case "vSET_BTopenPath1": Run % A_ScriptDir
-	Case "vSET_BTopenPath2": Run % APP_DATA_PATH
-	Case "vSET_BTopenPath3": Run % ini_Setting_WoWPath
-	Case "vSET_BTopenPath4": Run % ini_Setting_SavedPath
-	Case "vSET_BTopenPath5": Run % ini_Setting_BackUpPath
+	Case "vSET_BTopenPath1": path := A_ScriptDir
+	Case "vSET_BTopenPath2": path := APP_DATA_PATH
+	Case "vSET_BTopenPath3": GuiControlGet, path,, ini_Setting_WoWPath
+	Case "vSET_BTopenPath4": GuiControlGet, path,, ini_Setting_SavedPath
+	Case "vSET_BTopenPath5": GuiControlGet, path,, ini_Setting_BackUpPath
+	Default: return
 	}
+	if InStr(FileExist(path), "D")
+		try Run % path
 return
 
 ;=======================================================================================================================
@@ -254,14 +256,14 @@ DoAfterEditionChange:
 	gosub, DoAfterResetBackUpPath
 
 	;是否安装了相关插件检测及版本更新
-	gosub, AddonsCheckAndUpdata
+	gosub, AddonsCheckAndUpdate
 return
 
 ;=======================================================================================================================
 ;GroupBox<WoW相关插件> |
 ;======================
 ;是否安装了相关插件检测及插件版本更新
-AddonsCheckAndUpdata:
+AddonsCheckAndUpdate:
 	if !FileExist(WOW_ADDONS_PATH)
 		return
 	;检查插件是否安装
@@ -291,7 +293,7 @@ gSET_BTInstallAddon:
 	}
 	Gui MainGui:+Disabled	;主窗口禁用
 	FolderCopyEx(APP_DATA_PATH "\AddOns\PlayerInfo", WOW_ADDONS_PATH "\PlayerInfo")
-	gosub, AddonsCheckAndUpdata
+	gosub, AddonsCheckAndUpdate
 	Gui MainGui:-Disabled	;主窗口启用
 return
 
@@ -315,7 +317,8 @@ DoAfterResetSavedPath:
 	;创建当前版本的子文件夹
 	if WOW_EDITION
 	{
-		FileCreateDir, % SAVED_PATH "\" WOW_EDITION "\WTF\Account"    ;配置存储路径
+		FileCreateDir, % SAVED_PATH "\" WOW_EDITION "\WTF\Account"        ;自定义WTF路径
+		FileCreateDir, % SAVED_PATH "\" WOW_EDITION "\Interface\AddOns"   ;自定义插件路径
 	}
 return
 
