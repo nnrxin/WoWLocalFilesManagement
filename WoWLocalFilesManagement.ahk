@@ -13,6 +13,7 @@
 #MaxHotkeysPerInterval 99000000
 #HotkeyInterval 99000000
 #KeyHistory 0
+#MaxMem 1000
 ListLines Off
 Process, Priority, , A
 SetBatchLines, -1

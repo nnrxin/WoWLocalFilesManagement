@@ -48,6 +48,7 @@ AddMod_Setting:
 	Gui, MainGui:Font, cDefault norm, 微软雅黑 Light
 	Gui, MainGui:Add, Radio, xp+13 yp+22 h22 vini_AppGeneral_UserDataPos ggSET_RDDatePos, 保存到程序所在目录
 	Gui, MainGui:Add, Radio, xp y+1 hp ggSET_RDDatePos Checked, 保存到AppData目录
+	GuiControl,, ini_AppGeneral_UserDataPos, % 2 - ini_AppGeneral_UserDataPos       ;单选框初始化
 	Gui, MainGui:Add, Button, x+2 yp-23 Center w110 h22 vvSET_BTopenPath1 ggSET_BTopenPath, 打开程序所在目录
 	Gui, MainGui:Add, Button, xp y+1 Center wp hp vvSET_BTopenPath2 ggSET_BTopenPath, 打开AppData目录
 	
@@ -95,8 +96,6 @@ return
 GuiInit_Setting:
 	;MainGui控件:
 	GuiControl, Choose, ini_MainGui_MainTab, % ini_MainGui_MainTab    ;恢复上次Tab位置
-	;GroupBox<本程序的配置数据文件>:
-	GuiControl,, ini_AppGeneral_UserDataPos, % 2 - ini_AppGeneral_UserDataPos    ;单选框
 	;GroupBox<魔兽世界游戏路径><自定义存储路径><WTF备份存储路径>:
 	INI.Init("Setting", "WoWPath")    ;游戏路径
 	INI.Init("Setting", "WoWEdition")    ;游戏版本
