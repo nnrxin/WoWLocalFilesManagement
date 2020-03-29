@@ -87,7 +87,11 @@ AddMod_Setting:
 	ImageButton.Create(hSET_BTopenPath5, IB_Opts_OpenFile*)
 	Gui, MainGui:Add, Button, xs y+5 w245 hp ggSET_selectBackUpFolder, 选择路径
 	
-	;~ Gui, MainGui:Add, 
+	;logo图片
+	global hBitMapLogoClassic := LoadPicture(APP_DATA_PATH "\Img\GUI\Logo_Classic.png") 
+	global hBitMapLogoOnion := LoadPicture(APP_DATA_PATH "\Img\GUI\Logo_Onion.png")
+	global hBitMapLogoBFA := LoadPicture(APP_DATA_PATH "\Img\GUI\Logo_BFA.png")
+	global WOW_LOGO_PATH    ;当前图片的地址
 return
 
 ;=======================================================================================================================
@@ -248,6 +252,9 @@ DoAfterEditionChange:
 	WOW_EDITION_VERSION := WOW_WTF_CONFIG.Get("lastAddonVersion")    ;获取当前版本号
 	GuiControl,, vSET_TXEditionInfo, % WOW_EDITION_CN[WOW_EDITION] "(" WOW_EDITION_VERSION ")"
 	
+	;获取当前魔兽logo图片路径
+	gosub, GetWoWLogoPath
+	
 	;自定义存储路径生成对应子文件夹
 	gosub, DoAfterResetSavedPath
 
@@ -256,6 +263,22 @@ DoAfterEditionChange:
 
 	;是否安装了相关插件检测及版本更新
 	gosub, AddonsCheckAndUpdate
+return
+
+;获取当前图片的路径
+GetWoWLogoPath:
+	Switch WOW_EDITION
+	{
+	Case "_classic_":
+		WOW_LOGO_PATH := % "HBITMAP:*" hBitMapLogoClassic
+	Default:
+		if (WOW_EDITION_VERSION >= 90000)
+			WOW_LOGO_PATH := % "HBITMAP:*" hBitMapLogoOnion
+		else if (WOW_EDITION_VERSION >= 80000)
+			WOW_LOGO_PATH := % "HBITMAP:*" hBitMapLogoBFA
+		else
+			WOW_LOGO_PATH := WOW_EDITION " " WOW_EDITION_VERSION
+	}
 return
 
 ;=======================================================================================================================

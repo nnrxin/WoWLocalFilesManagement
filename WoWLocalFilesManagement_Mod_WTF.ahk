@@ -42,9 +42,6 @@ AddMod_WTF:
 	
 	;魔兽版本Logo
 	Gui, MainGui:Add, Picture, xm+605 ym+25 w150 h75 Section vvWTF_PICwowLogo, 
-	hBitMapLogoClassic := LoadPicture(APP_DATA_PATH "\Img\GUI\Logo_Classic.png") 
-	hBitMapLogoOnion := LoadPicture(APP_DATA_PATH "\Img\GUI\Logo_Onion.png")
-	hBitMapLogoBFA := LoadPicture(APP_DATA_PATH "\Img\GUI\Logo_BFA.png")
 	
 	;路径切换
 	Gui, MainGui:Font, c010101 bold, 微软雅黑
@@ -116,7 +113,7 @@ AddMod_WTF:
 	
 	;中部
 	Gui, MainGui:Font, c010101 bold, 微软雅黑
-	Gui, MainGui:Add, Button, x+5 ys-23 w110 h22 vvWTF_BTclean ggWTF_BTclean hwndhWTF_BTclean Disabled, 全 职 业    ;恢复全部职业
+	Gui, MainGui:Add, Button, x+5 ys-23 w110 h22 vvWTF_BTclean ggWTF_BTclean hwndhWTF_BTclean Disabled, 全 职 业     ;恢复全部职业
 	ImageButton.Create(hWTF_BTclean, [0,0xE1E1E1,,"red",,,0xADADAD],[,0xE5F1FB],[,0xCCE4F7],[,0xCCCCCC,,0x838383])   ;红字的默认按钮
 	
 	;配置覆盖选项
@@ -215,8 +212,9 @@ GuiInit_WTF:
 	;按钮激活 右
 	GuiControl, % "Enable"  TARGui.WTFpathSwitch, vWTF_BTtarWowPath     ;魔兽路径
 	GuiControl, % "Disable" TARGui.WTFpathSwitch, vWTF_BTtarSavedPath   ;自定义存储路径
+	;魔兽Logo图片刷新
+	GuiControl,, vWTF_PICwowLogo, % WOW_LOGO_PATH
 	
-	gosub, ShowWoWLogo    ;魔兽Logo图片刷新
 	gosub, srcScanNewPath    ;扫描新路径 左
 	gosub, tarScanNewPath    ;扫描新路径 右
 return
@@ -244,26 +242,6 @@ CleanItems:
 	GuiControl, Disable, vWTF_BTcopy     ;复制按钮
 	GuiControl, Disable, vWTF_BTsyn      ;同步按钮
 	GuiControl, Disable, vWTF_BTcopyRaw  ;向左同步
-return
-
-;=======================================================================================================================
-;魔兽版本Logo |
-;==============
-;显示魔兽logo图片
-ShowWoWLogo:
-	Switch WOW_EDITION
-	{
-	Case "_classic_":
-		picPath := % "HBITMAP:*" hBitMapLogoClassic
-	Default:
-		if (WOW_EDITION_VERSION >= 90000)
-			picPath := % "HBITMAP:*" hBitMapLogoOnion
-		else if (WOW_EDITION_VERSION >= 80000)
-			picPath := % "HBITMAP:*" hBitMapLogoBFA
-		else
-			picPath := WOW_EDITION " " WOW_EDITION_VERSION
-	}
-	GuiControl,, vWTF_PICwowLogo, % picPath
 return
 
 ;=======================================================================================================================
@@ -1013,26 +991,35 @@ ChangeLuaProfileKeys(filePaths, o, status := "")
 		lua := new WowAddOnSavedLua_Fast(A_LoopFileLongPath)
 		if (lua = "ERROR")    ;加载错误跳过
 			continue
-		if not (pos1 := lua.InStr("`r`n`t[""profileKeys""] = {"))    ;不存在key时跳过
-			continue
-		if not (pos2 := lua.InStr("`r`n`t},",, pos1))    ;不存在},时跳过(正常是不会发生)
-			continue
-		midText := SubStr(lua.text, pos1, pos2 - pos1 + 4)    ;中间段
-		if not RegExMatch(midText, "i)\t\t\[""(" o[1] "|" o[2] ").*(" o[1] "|" o[2] ")""] = .*\r\n", matchLine)    ;匹配出行
-			continue
-		if RegExMatch(midText, "i)\t\t\[""(" o[3] "|" o[4] ").*(" o[3] "|" o[4] ")""] = .*\r\n", matchLine2)    ;存在目标key
-			midText := StrReplace(midText, matchLine2, "")    ;删除目标
-		newLine := StrReplace(matchLine, o[1], o[3],,1)   ;替换角色 只替换一次
-		newLine := StrReplace(newLine, o[2], o[4],,1)   ;替换服务器 只替换一次
-		newMidText := StrReplace(midText, matchLine, matchLine . newLine)    ;返回被替换的值
-		if (newMidText <> matchLine)    ;中间段发生变化后
+		pos0 := 1
+		needWriteToFile := 0
+		loop
 		{
-			lua.text := SubStr(lua.text, 1, pos1 - 1) . newMidText . SubStr(lua.text, pos2 + 4)    ;重新拼合
+			if !(pos1 := lua.InStr("`r`n`t[""profileKeys""] = {",, Pos0))    ;不存在key时跳过
+				break
+			pos0 := pos1 + 25
+			if !(pos2 := lua.InStr("`r`n`t},",, pos1))    ;不存在},时跳过(正常是不会发生)
+				break
+			midText := SubStr(lua.text, pos1, pos2 - pos1 + 4)    ;中间段
+			if not RegExMatch(midText, "i)\t\t\[""(" o[1] "|" o[2] ").*(" o[1] "|" o[2] ")""] = .*\r\n", matchLine)    ;匹配出行
+				break
+			if RegExMatch(midText, "i)\t\t\[""(" o[3] "|" o[4] ").*(" o[3] "|" o[4] ")""] = .*\r\n", matchLine2)    ;存在目标key
+				midText := StrReplace(midText, matchLine2, "")    ;删除目标
+			newLine := StrReplace(matchLine, o[1], o[3],,1)   ;替换角色 只替换一次
+			newLine := StrReplace(newLine, o[2], o[4],,1)   ;替换服务器 只替换一次
+			newMidText := StrReplace(midText, matchLine, matchLine . newLine)    ;返回被替换的值
+			if (newMidText <> matchLine)    ;中间段发生变化后
+			{
+				lua.text := SubStr(lua.text, 1, pos1 - 1) . newMidText . SubStr(lua.text, pos2 + 4)    ;重新拼合
+				needWriteToFile := 1
+			}
+		}
+		if needWriteToFile
+		{
 			lua.WriteToFile()
 			try status.log := "修改文件:" A_LoopFileLongPath    ;记录更新
 			try status.logs .= "[修改]文件修改`t地址:" A_LoopFileLongPath "`r`n"    ;记录更新
 		}
-		lua := midText := newMidText := ""    ;释放内存
     }
 	lua := midText := newMidText := ""    ;释放内存
 	SetBatchLines %OldBatchLines%   ;恢复速度

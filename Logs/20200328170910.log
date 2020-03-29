@@ -1,0 +1,28 @@
+﻿index:96
+[备份]文件复制	源地址:D:\World of Warcraft\_retail_\WTF\Account\203663901#1\bindings-cache.old	目标地址:E:\WOW备份点\_retail_\WTF\Account@20200328170910\203663901#1\bindings-cache.old
+[删除]文件删除	地址:D:\World of Warcraft\_retail_\WTF\Account\203663901#1\bindings-cache.old
+[软连接]mklink 	链接地址:D:\World of Warcraft\_retail_\WTF\Account\203663901#1\bindings-cache.old	真实地址:E:\HUI\OneDrive\WoW Saved\_retail_\WTF\Account\NNRXIN\bindings-cache.old
+[备份]文件复制	源地址:D:\World of Warcraft\_retail_\WTF\Account\203663901#1\bindings-cache.wtf	目标地址:E:\WOW备份点\_retail_\WTF\Account@20200328170910\203663901#1\bindings-cache.wtf
+[删除]文件删除	地址:D:\World of Warcraft\_retail_\WTF\Account\203663901#1\bindings-cache.wtf
+[软连接]mklink 	链接地址:D:\World of Warcraft\_retail_\WTF\Account\203663901#1\bindings-cache.wtf	真实地址:E:\HUI\OneDrive\WoW Saved\_retail_\WTF\Account\NNRXIN\bindings-cache.wtf
+[备份]文件复制	源地址:D:\World of Warcraft\_retail_\WTF\Account\203663901#1\cache.md5	目标地址:E:\WOW备份点\_retail_\WTF\Account@20200328170910\203663901#1\cache.md5
+[删除]文件删除	地址:D:\World of Warcraft\_retail_\WTF\Account\203663901#1\cache.md5
+[软连接]mklink 	链接地址:D:\World of Warcraft\_retail_\WTF\Account\203663901#1\cache.md5	真实地址:E:\HUI\OneDrive\WoW Saved\_retail_\WTF\Account\NNRXIN\cache.md5
+[备份]文件复制	源地址:D:\World of Warcraft\_retail_\WTF\Account\203663901#1\config-cache.old	目标地址:E:\WOW备份点\_retail_\WTF\Account@20200328170910\203663901#1\config-cache.old
+[删除]文件删除	地址:D:\World of Warcraft\_retail_\WTF\Account\203663901#1\config-cache.old
+[软连接]mklink 	链接地址:D:\World of Warcraft\_retail_\WTF\Account\203663901#1\config-cache.old	真实地址:E:\HUI\OneDrive\WoW Saved\_retail_\WTF\Account\NNRXIN\config-cache.old
+[备份]文件复制	源地址:D:\World of Warcraft\_retail_\WTF\Account\203663901#1\config-cache.wtf	目标地址:E:\WOW备份点\_retail_\WTF\Account@20200328170910\203663901#1\config-cache.wtf
+[删除]文件删除	地址:D:\World of Warcraft\_retail_\WTF\Account\203663901#1\config-cache.wtf
+[软连接]mklink 	链接地址:D:\World of Warcraft\_retail_\WTF\Account\203663901#1\config-cache.wtf	真实地址:E:\HUI\OneDrive\WoW Saved\_retail_\WTF\Account\NNRXIN\config-cache.wtf
+[备份]文件复制	源地址:D:\World of Warcraft\_retail_\WTF\Account\203663901#1\macros-cache.old	目标地址:E:\WOW备份点\_retail_\WTF\Account@20200328170910\203663901#1\macros-cache.old
+[删除]文件删除	地址:D:\World of Warcraft\_retail_\WTF\Account\203663901#1\macros-cache.old
+[软连接]mklink 	链接地址:D:\World of Warcraft\_retail_\WTF\Account\203663901#1\macros-cache.old	真实地址:E:\HUI\OneDrive\WoW Saved\_retail_\WTF\Account\NNRXIN\macros-cache.old
+[备份]文件复制	源地址:D:\World of Warcraft\_retail_\WTF\Account\203663901#1\macros-cache.txt	目标地址:E:\WOW备份点\_retail_\WTF\Account@20200328170910\203663901#1\macros-cache.txt
+[删除]文件删除	地址:D:\World of Warcraft\_retail_\WTF\Account\203663901#1\macros-cache.txt
+[软连接]mklink 	链接地址:D:\World of Warcraft\_retail_\WTF\Account\203663901#1\macros-cache.txt	真实地址:E:\HUI\OneDrive\WoW Saved\_retail_\WTF\Account\NNRXIN\macros-cache.txt
+[备份]文件复制	源地址:D:\World of Warcraft\_retail_\WTF\Account\203663901#1\SavedVariables	目标地址:E:\WOW备份点\_retail_\WTF\Account@20200328170910\203663901#1\SavedVariables
+[删除]文件删除	地址:D:\World of Warcraft\_retail_\WTF\Account\203663901#1\SavedVariables
+[软连接]mklink 	链接地址:D:\World of Warcraft\_retail_\WTF\Account\203663901#1\SavedVariables	真实地址:E:\HUI\OneDrive\WoW Saved\_retail_\WTF\Account\NNRXIN\SavedVariables
+[备份]文件复制	源地址:D:\World of Warcraft\_retail_\WTF\Account\203663901#1\伊森利恩\醉无邪	目标地址:E:\WOW备份点\_retail_\WTF\Account@20200328170910\203663901#1\伊森利恩\醉无邪
+[删除]文件删除	地址:D:\World of Warcraft\_retail_\WTF\Account\203663901#1\伊森利恩\醉无邪
+[软连接]mklink 	链接地址:D:\World of Warcraft\_retail_\WTF\Account\203663901#1\伊森利恩\醉无邪	真实地址:E:\HUI\OneDrive\WoW Saved\_retail_\WTF\Account\NNRXIN\伊森利恩\醉无邪

@@ -28,7 +28,7 @@ SetWorkingDir, % A_ScriptDir
 ;APP基本信息
 global APP_NAME      := "WoWLocalFilesManagement"            ;APP名称
 global APP_NAME_CN   := "魔兽世界本地文件管理工具WOW-LFM"    ;APP中文名称
-global APP_VERSION   := 0.5                                  ;当前版本
+global APP_VERSION   := 0.6                                  ;当前版本
 global APP_DATA_PATH := A_AppData "\" APP_NAME               ;在系统AppData的保存位置
 FileCreateDir, % APP_DATA_PATH                               ;路径不存在时需要新建
 
@@ -60,9 +60,10 @@ Gui, MainGui:Font, cDefault norm, 微软雅黑 Light
 ;加载各模块及其Tab
 global MODS := []
 GuiAddTabMod("MainGui", "ini_MainGui_MainTab", MODS, "基本设置", "Setting")
+GuiAddTabMod("MainGui", "ini_MainGui_MainTab", MODS, "控制台", "WTFconfig")
 GuiAddTabMod("MainGui", "ini_MainGui_MainTab", MODS, "WTF", "WTF")
-GuiAddTabMod("MainGui", "ini_MainGui_MainTab", MODS, "WTF备份管理", "WTFbackup")
-GuiAddTabMod("MainGui", "ini_MainGui_MainTab", MODS, "插件管理", "AddOns")
+GuiAddTabMod("MainGui", "ini_MainGui_MainTab", MODS, "WTF备份", "WTFbackup")
+GuiAddTabMod("MainGui", "ini_MainGui_MainTab", MODS, "插件", "AddOns")
 GuiAddTabMod("MainGui", "ini_MainGui_MainTab", MODS, "关于", "About")
 
 Gui, MainGui:Font, italic    ;斜体
@@ -159,6 +160,7 @@ GuiAddTabMod(G, tab, ByRef mods, tabName, modName)
 
 ;加载模块文件：
 #Include WoWLocalFilesManagement_Mod_Setting.ahk
+#Include WoWLocalFilesManagement_Mod_WTFconfig.ahk
 #Include WoWLocalFilesManagement_Mod_WTF.ahk
 #Include WoWLocalFilesManagement_Mod_WTFbackup.ahk
 #Include WoWLocalFilesManagement_Mod_AddOns.ahk
@@ -356,12 +358,13 @@ Class GUIListView
 ;无法单独使用,只能派生成特定的类使用
 Class FileDataStorage
 {
+	static status := {}       ;数据整体状态
+	static options := {}      ;数据控制选项
+	
 	__New()
 	{
 		this.dataItems := {}    ;数据组集合
 		this.dataIndex := 0     ;当前数据组序号
-		this.status := {}       ;数据整体状态
-		this.options := {}      ;数据控制选项
 	}
 	
 	;新增数据组dataItem, 返回当前的dataIndex

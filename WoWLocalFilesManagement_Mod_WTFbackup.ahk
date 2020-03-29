@@ -14,15 +14,18 @@
 AddMod_WTFbackup:
 	;模块部署
 	
-	;在MainGui的TAB上:
+	;Tab上的GUI控件
+	Gui, MainGui:Add, Picture, xm+605 ym+25 w150 h75 Section vvWTFBak_PICwowLogo,     ;魔兽版本Logo
+	
 	Gui, MainGui:Add, Text, xm+10 ym+33 w60 h22 Center Section, 备份路径
-	Gui, MainGui:Add, Edit, x+0 yp-3 w660 h22 ReadOnly vvWTFBak_EDbackupPath, 备份路径
+	Gui, MainGui:Add, Edit, x+0 yp-3 w510 h22 ReadOnly vvWTFBak_EDbackupPath, 备份路径
 	Gui, MainGui:Add, Button, x+0 yp h22 w22 vvWTFBak_BTopenPath1 hwndhWTFBak_BTopenPath1 ggWTFBak_BTopenPath, ; 打开目录
 	IB_Opts_OpenFile := [[0,APP_DATA_PATH "\Img\GUI\Folder.png"], [,APP_DATA_PATH "\Img\GUI\Folderp.png"]]    ;ImageButton配色(打开文件夹)
 	ImageButton.Create(hWTFBak_BTopenPath1, IB_Opts_OpenFile*)
+	
 	Gui, MainGui:Add, Button, xs y+5 w80 h45 Disabled vvWTFBak_BTrestore ggWTFBak_BTrestore, 还原
 	Gui, MainGui:Add, Button, x+5 yp wp hp Disabled vvWTFBak_BTdelete ggWTFBak_BTdelete, 删除
-	Gui, MainGui:Add, GroupBox, x+5 yp w500 h55, 批量删除
+	Gui, MainGui:Add, GroupBox, x+5 yp w400 h55, 批量删除
 	Gui, MainGui:Add, Button, xp+10 yp+20 h25 vvWTFBak_BTdelete7 Disabled, 删除一周之前的
 	Gui, MainGui:Add, Button, x+5 yp hp vvWTFBak_BTdelete30 Disabled, 删除一个月之前的
 	Gui, MainGui:Add, Button, x+5 yp hp vvWTFBak_BTdelete365 Disabled, 删除一年之前的
@@ -39,6 +42,7 @@ return
 GuiInit_WTFbackup:
 	WTFBakGUIListView.backupWTFPath := WOW_EDITION ? (BACKUP_PATH "\" WOW_EDITION "\WTF") : ""    ;备份wtf路径
 	GuiControl,, vWTFBak_EDbackupPath, % WTFBakGUIListView.backupWTFPath     ;WTF备份路径
+	GuiControl,, vWTFBak_PICwowLogo, % WOW_LOGO_PATH                         ;魔兽Logo图片刷新
 	gosub, scanBackupPath
 return
 
@@ -177,7 +181,7 @@ Class WTFBakDataStorage extends FileDataStorage
 {
 	static sels := {}                ;当前选择的项目
 	static status := {}              ;数据整体状态
-	static options := {}  ;数据控制选项
+	static options := {}             ;数据控制选项
 	
 	;扫描给定的WTFBak目录,返回items
 	UpdateData(dataIndex, dataPath)
@@ -195,7 +199,7 @@ Class WTFBakDataStorage extends FileDataStorage
 			dataItem.items[i] := {index     : i                                   ;序号
 							    , time      : time                                ;日期
 								, fileSize  : FilesSizeEx(A_LoopFileLongPath, "MB", "{1:0.1f} MB")     ;文件大小
-								, fromPath  : fromPath "\Account"                 ;来自路径
+								, fromPath  : fromPath                            ;来自路径
 								, nowPath   : A_LoopFileLongPath                  ;当前路径
 								, dataIndex : dataIndex}                          ;数据序号
 		}

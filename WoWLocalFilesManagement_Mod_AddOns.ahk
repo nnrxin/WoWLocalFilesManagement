@@ -32,8 +32,10 @@ AddMod_AddOns:
 	ImageButton.Create(hAO_BTopenPath2, IB_Opts_OpenFile*)
 	
 	
+	Gui, MainGui:Add, Picture, xm+320 ym+25 w120 h60 Section vvAO_PICwowLogo,    ;魔兽版本Logo
+	
 	Gui, MainGui:Font, c010101 bold, 微软雅黑
-	Gui, MainGui:Add, GroupBox, xm+325 ym+60 w110 h50 Section, % "筛选"
+	Gui, MainGui:Add, GroupBox, xp+5 y+5 w110 h50 Section, % "筛选"
 	Gui, MainGui:Font, cDefault norm, 微软雅黑 Light
 	Gui, MainGui:Add, Edit, xp+10 yp+20 w90 h22 vini_AO_include hwndhAO_EDinclude ggAO_EDfilter, % INI.Init("AO", "include")    ;包含
 	
@@ -98,6 +100,7 @@ GuiInit_AddOns:
 	AddOnsGUIListView.savedAddOnsPath := WOW_EDITION ? (SAVED_PATH "\" WOW_EDITION "\Interface\AddOns") : ""    ;自定义AddOns路径
 	GuiControl,, vAO_EDwowAddOnsPath,   % AddOnsGUIListView.wowAddOnsPath       ;魔兽AddOns路径
 	GuiControl,, vAO_EDsavedAddOnsPath, % AddOnsGUIListView.savedAddOnsPath     ;自定义AddOns路径
+	GuiControl,, vAO_PICwowLogo, % WOW_LOGO_PATH                                ;魔兽Logo图片刷新
 	gosub, scanWowAddOnsPath
 	gosub, scanSavedAddOnsPath
 return

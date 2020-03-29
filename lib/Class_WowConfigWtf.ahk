@@ -1,80 +1,112 @@
 ﻿;魔兽世界配置文件操作类
 class WowConfigWtf
 {
+	static FILE_ENCODING := "CP65001"    ;常用文件编码ID, UTF-8:65001, GB18030(XP及更高版本简体中文):54936
+	
 	__New(filePath)
 	{
-		if !FileExist(filePath)
-			return
 		this.filePath := filePath
-		this.lines := []
-		this.Encoding := "UTF-8"
-		NowFileEncoding := A_FileEncoding     ;保存当前编码
-		FileEncoding, % this.Encoding    ;lua的写入需要UTF-8
-		Loop, read, %filePath%
-			this.lines.push(A_LoopReadLine)
-		FileEncoding, %NowFileEncoding%     ;恢复之前的编码
+		this.UpdateText()
 	}
-	
-	__Delete()
+
+	;删除
+    __Delete()
 	{
-		this.lines := ""
+		VarSetCapacity(this.text, 0)
 	}
 	
+	;更新文本
+	UpdateText()
+	{
+		Try FileRead, text, % (this.FILE_ENCODING ? StrReplace(this.FILE_ENCODING, "C", "*") " " : "") . this.filePath
+		catch
+			return 0    ;失败时返回 0
+		this.text := text
+		VarSetCapacity(text, 0)
+		return 1
+	}
+	
+	;解析文件内容,输出详细数组
+	GetAllValue()
+	{
+		OldBatchLines := A_BatchLines   ;保存当前运行速度设置
+		SetBatchLines -1   ;全速运行
+		items := {}
+		Loop, Read, % this.filePath
+		{
+			if  RegExMatch(A_LoopReadLine, "i)(?<=SET ).*(?= )", key)
+			and RegExMatch(A_LoopReadLine, "i)(?<= "").*(?="")", value)
+				items.push({key:key, value:value})
+		}
+		return items
+		SetBatchLines %OldBatchLines%   ;恢复速度
+	}
+	
+	;写入文件(默认写入this.text)
+	WriteToFile(text := "S_T_R_I_N_V_A_R")
+	{
+		if (text == "S_T_R_I_N_V_A_R")
+			this.FileRewrite(this.text)
+		else
+			this.FileRewrite(text)
+	}
+	
+	;在文本中查找字串SearchText,返回发现位置 options可选:CaseSensitive := false, StartingPos := 1, Occurrence := 1
+	InStr(SearchText, options*)
+	{
+		return InStr(this.text, SearchText, options*)
+	}
+
+	;字串替换, 返回替换的数量
+	StrReplace(SearchText, ReplaceText, Limit := -1)
+	{
+		this.text := StrReplace(this.text, SearchText, ReplaceText, replaceCount, Limit)
+		return replaceCount
+	}
+
+	;批量的字串替换, 输入:指令对象[["目标1", "替换1", Limit1],["目标2", "替换2", Limit2]], 返回:替换的数量
+	StrReplaceBatch(o)
+	{
+		replaceCount := 0
+		for i, options in o
+			replaceCount += this.StrReplace(options*)
+		return replaceCount
+	}
+
 	;获取key的设定值
 	Get(key, Default := "")
 	{
-		for i, line in this.lines
-		{
-			if InStr(line, "SET " key " """)
-				return Trim(SubStr(line,InStr(line,"""")),"""")	;简单的处理 可能会多切掉"
-		}
-		return Default
+		if RegExMatch(this.text, "i)(?<=SET " key " "").*(?="")", value)
+			return value
+		else
+			return Default
 	}
 
 	;设置key值为Value
-	Set(key, Value)
+	Set(key, value, writeToFile := false)
 	{
-		newContents := ""
-		for i, line in this.lines
-		{
-			if InStr(line, "SET " key " """)
-			{
-				line := RegExReplace(line, "i)(?<=" key ").*", " """ Value """")
-				isfound := true
-			}
-			newContents .= line "`r`n"
-		}
-		this.FileRewrite(newContents)
-		if not isfound
-		{
-			newLine := "SET " key " """ Value """"
-			this.lines.push(newLine)    ;新增
-			FileAppend, % newLine "`r`n", % this.filePath, % this.Encoding
-		}
+		if this.InStr("SET " key " """)
+			this.text := RegExReplace(this.text, "i)(?<=SET " key " "").*(?="")", value)    ;替换原有的
+		else
+			this.text .= "SET " key " """ value """`r`n"    ;新增一行
+		if writeToFile
+			this.WriteToFile()
 	}
 	
 	;删除key的那行
-	Del(key)
+	Del(key, writeToFile := false)
 	{
-		newContents := ""
-		for i, line in this.lines
-		{
-			if InStr(line, "SET " key " """)
-			{
-				this.lines.Delete(i)    ;删除
-				continue
-			}
-			newContents .= line "`r`n"
-		}
-		this.FileRewrite(newContents)
+		this.text := RegExReplace(this.text, "i)SET " key " "".*""\r\n", "", count)
+		if writeToFile and count 
+			this.WriteToFile()
 	}
 	
 	;不删除原文件的情况下重写文件
-	FileRewrite(Content)
+	FileRewrite(text)
 	{
-		File := FileOpen(this.filePath, "rw", this.Encoding)
+		File := FileOpen(this.filePath, "rw", this.FILE_ENCODING)
 		File.Length := 0
-		File.Write(Content)
+		File.Write(text)
 		File.Close()
 	}
 }
